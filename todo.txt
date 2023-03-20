@@ -1,0 +1,17 @@
+Backlog:
+* Jag vill ha så att man kan klicka ctrl z för att stega tillbaka
+* Jag vill ha en animation timeline där man kan välja fps, stega igenom med en slider och välja specifika frames beroende på var man vill måla.
+* Det ska kunna gå att spara animation eller en enskild frame som en en grupp av/enskilda png/jpg eller som en gif.
+* Jag vill ha ett färghjul där man kan välja färg.
+* Jag vill att man ska kunna spara en färg i paletten
+* Jag vill ha att man kan ha flera olika paletter med grupper av färgvärden
+* Jag vill ha ett pipettverktyg
+* Jag vill ha ett suddgummi
+* Det ska kunna gå att se vilken färg som är vald, både som en markör vid paletten men också i ett specifikt fönster där aktuell färg visas
+
+Current Sprint
+* Jag vill ha ett litet UI där man kan välja färg. Det ska vara utifrån default färgvärden.
+
+Finished:
+* Jag vill ha en custom muspekare istället för den vanliga
+* Jag vill att en ruta markeras om muspekaren är över den, så man vet vilken pixel som målas i när man trycker
