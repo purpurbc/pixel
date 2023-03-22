@@ -30,7 +30,6 @@ clock = pg.time.Clock()
 fps = 60. # not really fps
 
 # load background image
-bg = pg.image.load("pics/bg_markers.png")
 cursor_image = pg.image.load("pics/cursor_pixel_v1.png")
 
 def get_global_coords(rect, local_coords):

@@ -30,7 +30,7 @@ def init():
     pg.display.set_caption("pxls")
     
     # Create the pixelmap
-    x = 10
+    x = 20
     s = 500
     pixel_map = pm.PixelMap((int(s/x),int(s/x)), pg.Rect(250,50,s,s))
     
