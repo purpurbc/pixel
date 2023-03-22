@@ -9,11 +9,10 @@ Backlog:
 * Jag vill ha ett suddgummi
 * Det ska kunna gå att se vilken färg som är vald, både som en markör vid paletten men också i ett specifikt fönster där aktuell färg visas
 * Fix a global class for the important instances(pixel_map, tool_box, etc)
-
+* Sök upp hur man åtgärdar "circular import errors"
 
 Current Sprint
 * När man sparar objektet ska man behöva skriva in namn på filen
-
 
 Finished:
 * Jag vill ha en custom muspekare istället för den vanliga

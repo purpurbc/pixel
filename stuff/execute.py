@@ -41,9 +41,12 @@ def init():
     
     saver = sv.Saver()
     
+    internal_window = lo.InternalWindow(pg.Rect(100,100,100,100))
+    
     interf_.interface.add_pixelmap(pixel_map)
     interf_.interface.add_toolbox(tool_box)
     interf_.interface.add_saver(saver)
+    interf_.interface.add_internal_window(internal_window)
 
 
 def buttons_pressed(buttons : list, mouse_pos, left_mouse_btn_pressed):
@@ -177,6 +180,8 @@ def run_application():
         # TODO: fix this
         rd.draw_button(game_display, button_c, mouse_pos, left_mouse_btn_pressed)
         rd.draw_button(game_display, button_s, mouse_pos, left_mouse_btn_pressed)
+        
+        rd.draw_internal_window(game_display,interf_.interface.internal_windows['new_window'])
         
         # Handle button hovers if there are any
         buttons_hovered(buttons,mouse_pos,left_mouse_btn_pressed)

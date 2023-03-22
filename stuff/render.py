@@ -105,6 +105,12 @@ def draw_container(game_display, container : lo.Container):
     pg.draw.rect(game_display, container.color, container.rect)
 
 
+def draw_internal_window(game_display, internal_window : lo.InternalWindow):
+    #TODO: create Surface and blit that instead. Can use alpha values
+    pg.draw.rect(game_display, internal_window.color, internal_window.rect)
+    draw_cell(game_display, internal_window.rect, internal_window.line_color, internal_window.line_width)
+
+
 def blit_pixelmap(game_display, pixel_map):
     """Blit/Render everything"""
 

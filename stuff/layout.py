@@ -1,9 +1,5 @@
 import pygame as pg
 from stuff import helpers as h
-from stuff import tools as tl
-from stuff import pixel_map as pm
-from types import MethodType
-from PIL import Image
 from stuff import interface as interf_
 
 
@@ -14,9 +10,7 @@ def close_window(self):
     
 def change_pen_color(self):
     interf_.interface.tool_box.get_active_tool().color = self.color
-    
-
-    
+      
 
 class Button:
     """
@@ -84,13 +78,8 @@ class Button:
             self.action()
             self.set_pressed(False)
             return True
-        return False
+        return False 
 
-
-class TextArea:
-    def __init__(self, rect):
-        self.rect = rect
-    
 
 class Container:
     def __init__(self, rect, objects : list = []):
@@ -108,5 +97,27 @@ class Container:
         self.objects.append(button)
         
         
+class TextArea:
+    def __init__(self, rect):
+        self.rect = rect
+
+class InputArea:
+    def __init__(self, rect):
+        self.rect = rect
+        
+class InternalWindow:
+    def __init__(self, rect : pg.Rect, name : str='new_window'):
+        self.rect = rect
+        self.color = h.dark_grey
+        self.line_color = h.white
+        self.line_width = 3
+        self.name = name
+        self.active = False
+        
+    def highlight_window(self):
+        pass
+    
+    def set_active(self, active):
+        self.active = active
 
 
