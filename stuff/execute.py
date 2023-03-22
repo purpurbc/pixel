@@ -4,8 +4,11 @@ from stuff import pixel_map as pm
 from stuff import render as rd
 from stuff import layout as lo
 from stuff import tools as tl
-from types import MethodType
+from stuff import saver as sv
+from stuff import interface as interf_
+from types import MethodType, FunctionType
 import copy
+from PIL import Image
 
 
 def init():
@@ -25,6 +28,22 @@ def init():
 
     # Set the caption of the display
     pg.display.set_caption("pxls")
+    
+    # Create the pixelmap
+    x = 10
+    s = 500
+    pixel_map = pm.PixelMap((int(s/x),int(s/x)), pg.Rect(250,50,s,s))
+    
+    pen = tl.Pen()
+    tool_box = tl.ToolBox()
+    tool_box.add_tool('pen',pen)
+    tool_box.set_active_tool('pen')
+    
+    saver = sv.Saver()
+    
+    interf_.interface.add_pixelmap(pixel_map)
+    interf_.interface.add_toolbox(tool_box)
+    interf_.interface.add_saver(saver)
 
 
 def buttons_pressed(buttons : list, mouse_pos, left_mouse_btn_pressed):
@@ -49,13 +68,6 @@ def run_application():
     # Create the game display
     game_display = pg.display.set_mode(h.s_dimension) 
 
-    # Create the pixelmap
-    x = 20
-    s = 500
-    #pixel_map = pm.PixelMap((int(h.s_H/x),int(h.s_W/x)), pg.Rect(0,0,h.s_W,h.s_H))
-    pixel_map = pm.PixelMap((int(s/x),int(s/x)), pg.Rect(250,50,s,s))
-    #print(pixel_map.pixel_dimensions)
-
     left_mouse_btn_pressed = False
     running = True
 
@@ -75,16 +87,15 @@ def run_application():
     button4 = lo.Button(pg.Rect(16+3*side,4,side,side),h.red,h.red,h.white)
     button4.action = MethodType(lo.change_pen_color,button4)
     
-    button_c = lo.Button(pg.Rect(h.s_W-side-20,5,side + 15,side))
+    button_c = lo.Button(pg.Rect(h.s_W-side-20,5,side + 15,side),h.red,h.light_red,h.white)
     button_c.action = MethodType(lo.close_window,button_c)
+    
+    button_s = lo.Button(pg.Rect(h.s_W-side- 40 - side,5,side + 15,side),h.blue,h.light_blue,h.white)
+    button_s.action = interf_.interface.saver.save_as_png
     
     buttons = [button1, button2, button3, button4]
     
     btn_container = lo.Container(pg.Rect(50,50,100,500),buttons)
-    
-    pen = tl.Pen()
-    tl.tool_box.add_tool('pen',pen)
-    tl.tool_box.set_active_tool('pen')
     
     
     
@@ -109,12 +120,16 @@ def run_application():
                 left_mouse_btn_pressed = True
                 
                 # Fill the pixel, if one is pressed
-                tl.tool_box.get_active_tool().fill_pixels(pixel_map, mouse_pos)
+                interf_.interface.tool_box.get_active_tool().fill_pixels(interf_.interface.pixel_map, mouse_pos)
 
                 # Handle button presses if there are any
                 buttons_pressed(buttons,mouse_pos,left_mouse_btn_pressed) 
                 
+                # TODO: fix this
                 if button_c.on_pressed(mouse_pos,left_mouse_btn_pressed):
+                    pass
+                
+                if button_s.on_pressed(mouse_pos,left_mouse_btn_pressed):
                     pass
             
             # If the left mouse button is released
@@ -125,7 +140,11 @@ def run_application():
                 # Handle button clicks if there are any
                 buttons_clicked(buttons,mouse_pos,left_mouse_btn_pressed)
                 
+                # TODO: fix this
                 if button_c.on_clicked(mouse_pos,left_mouse_btn_pressed):
+                    pass
+                
+                if button_s.on_clicked(mouse_pos,left_mouse_btn_pressed):
                     pass
 
             # If a key is pressed
@@ -133,24 +152,31 @@ def run_application():
                 
                 # If the pressed key is C
                 if event.key == pg.K_c:
-                    
                     # Clear the pixel_map
-                    rd.clear_pixelmap(pixel_map)
+                    rd.clear_pixelmap(interf_.interface.pixel_map)
+                    
+                # If the pressed key is S
+                if event.key == pg.K_s: 
+                    # Save image as png
+                    interf_.interface.saver.save_as_png()
+                    
 
         # Blit the pixelmap                
-        rd.blit_pixelmap(game_display, pixel_map)
+        rd.blit_pixelmap(game_display, interf_.interface.pixel_map)
 
         # Blit a cell around the hovered pixel to highlight it
-        hovered_pixel = pixel_map.get_pixel(mouse_pos)
+        hovered_pixel = interf_.interface.pixel_map.get_pixel(mouse_pos)
         if hovered_pixel:
-            rd.draw_cell(game_display, hovered_pixel.rect, pixel_map.line_color, 4)
+            rd.draw_cell(game_display, hovered_pixel.rect, interf_.interface.pixel_map.line_color, 4)
         
+        # Draw the container
         rd.draw_container(game_display, btn_container)
-        
         # Draw all the buttons
         rd.draw_buttons(game_display, buttons, mouse_pos, left_mouse_btn_pressed)
         
+        # TODO: fix this
         rd.draw_button(game_display, button_c, mouse_pos, left_mouse_btn_pressed)
+        rd.draw_button(game_display, button_s, mouse_pos, left_mouse_btn_pressed)
         
         # Handle button hovers if there are any
         buttons_hovered(buttons,mouse_pos,left_mouse_btn_pressed)

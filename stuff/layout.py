@@ -1,18 +1,21 @@
 import pygame as pg
 from stuff import helpers as h
 from stuff import tools as tl
+from stuff import pixel_map as pm
 from types import MethodType
+from PIL import Image
+from stuff import interface as interf_
 
 
+# TODO: Move these functions to a proper class/file
 def close_window(self):
     print("CLOSING WINDOW...")
     pg.event.post(pg.event.Event(pg.QUIT))
-
-#CHANGE_PEN_COLOR = pg.USEREVENT + 1
-def change_pen_color(self):
-    tl.tool_box.get_active_tool().color = self.color
-    #pg.event.post(pg.event.Event(CHANGE_PEN_COLOR))
     
+def change_pen_color(self):
+    interf_.interface.tool_box.get_active_tool().color = self.color
+    
+
     
 
 class Button:
@@ -87,12 +90,6 @@ class Button:
 class TextArea:
     def __init__(self, rect):
         self.rect = rect
-
-
-def get_global_coords(rect, local_coords):
-    x = rect.x + local_coords[0]
-    y = rect.y + local_coords[1]
-    return [x,y]
     
 
 class Container:
@@ -106,7 +103,7 @@ class Container:
         self.line_width = 3
         
     def add_button(self, button : Button, local_coords):
-        global_coords = get_global_coords(self.rect, local_coords)
+        global_coords = h.get_global_coords(self.rect, local_coords)
         button.rect.x, button.rect.y = global_coords[0], global_coords[1]
         self.objects.append(button)
         
