@@ -6,7 +6,7 @@ from stuff import layout as lo
 from stuff import tools as tl
 from stuff import saver as sv
 from stuff import interface as interf_
-from types import MethodType, FunctionType
+from types import MethodType
 import copy
 from PIL import Image
 
@@ -30,7 +30,7 @@ def init():
     pg.display.set_caption("pxls")
     
     # Create the pixelmap
-    x = 20
+    x = 10
     s = 500
     pixel_map = pm.PixelMap((int(s/x),int(s/x)), pg.Rect(250,50,s,s))
     
@@ -100,7 +100,10 @@ def run_application():
     
     btn_container = lo.Container(pg.Rect(50,50,100,500),buttons)
     
-    
+    # FIXME:
+    user_input = ''
+    base_font = pg.font.Font(None, 20)
+    input_rect = interf_.interface.internal_windows['new_window'].rect
     
     while running:
         
@@ -134,6 +137,12 @@ def run_application():
                 
                 if button_s.on_pressed(mouse_pos,left_mouse_btn_pressed):
                     pass
+
+                # FIXME:
+                if interf_.interface.internal_windows['new_window'].rect.collidepoint(event.pos):
+                    interf_.interface.internal_windows['new_window'].set_active(True)
+                else: 
+                    interf_.interface.internal_windows['new_window'].set_active(False)
             
             # If the left mouse button is released
             if event.type == pg.MOUSEBUTTONUP and event.button == 1:
@@ -153,6 +162,13 @@ def run_application():
             # If a key is pressed
             if event.type == pg.KEYDOWN:
                 
+                # FIXME:
+                for internal_window_name, internal_window in interf_.interface.internal_windows.items():
+                    if internal_window.active and event.key != pg.K_BACKSPACE:
+                        user_input += event.unicode
+                    elif internal_window.active and event.key == pg.K_BACKSPACE:
+                        user_input = user_input[:-1]
+
                 # If the pressed key is C
                 if event.key == pg.K_c:
                     # Clear the pixel_map
@@ -162,27 +178,33 @@ def run_application():
                 if event.key == pg.K_s: 
                     # Save image as png
                     interf_.interface.saver.save_as_png()
-                    
 
+                
         # Blit the pixelmap                
         rd.blit_pixelmap(game_display, interf_.interface.pixel_map)
 
         # Blit a cell around the hovered pixel to highlight it
         hovered_pixel = interf_.interface.pixel_map.get_pixel(mouse_pos)
         if hovered_pixel:
-            rd.draw_cell(game_display, hovered_pixel.rect, interf_.interface.pixel_map.line_color, 4)
+            rd.draw_cell(game_display, hovered_pixel.rect, interf_.interface.pixel_map.line_color, 2)
         
         # Draw the container
         rd.draw_container(game_display, btn_container)
         # Draw all the buttons
         rd.draw_buttons(game_display, buttons, mouse_pos, left_mouse_btn_pressed)
         
+
         # TODO: fix this
         rd.draw_button(game_display, button_c, mouse_pos, left_mouse_btn_pressed)
         rd.draw_button(game_display, button_s, mouse_pos, left_mouse_btn_pressed)
         
+
+        # FIXME: 
         rd.draw_internal_window(game_display,interf_.interface.internal_windows['new_window'])
+        text_surface = base_font.render(user_input, True, (255, 255, 255))
+        game_display.blit(text_surface, (input_rect.x+5, input_rect.y+5))
         
+
         # Handle button hovers if there are any
         buttons_hovered(buttons,mouse_pos,left_mouse_btn_pressed)
         
@@ -191,7 +213,8 @@ def run_application():
         game_display.blit(h.cursor_image,(cursor_img_rect.x,cursor_img_rect.y) ) # draw the cursor
 
         # Update the window
-        pg.display.update()
+        #pg.display.update()
+        pg.display.flip()
         h.clock.tick(h.fps)
         
     print("WINDOW CLOSED!")

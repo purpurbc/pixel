@@ -56,10 +56,3 @@ class PixelMap:
                     color = (0,0,0,0)
                 pixels.append(color)
         return pixels
-    
-# Create the pixelmap
-x = 10
-s = 500
-#pixel_map = pm.PixelMap((int(h.s_H/x),int(h.s_W/x)), pg.Rect(0,0,h.s_W,h.s_H))
-pixel_map = PixelMap((int(s/x),int(s/x)), pg.Rect(250,50,s,s))
-#print(pixel_map.pixel_dimensions)

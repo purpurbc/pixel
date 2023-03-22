@@ -119,5 +119,9 @@ class InternalWindow:
     
     def set_active(self, active):
         self.active = active
+        if active:
+            self.line_color = h.light_red
+        else:
+            self.line_color = h.white
 
 

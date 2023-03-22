@@ -54,15 +54,20 @@ def draw_pixelmap(game_display, pixel_map : pm.PixelMap):
     # Draw the grid 
     for row in range(pixel_map.pixel_dimensions[1]+1):
 
-        pg.draw.line(game_display, 
+        """pg.draw.line(game_display, 
                      pixel_map.grid_line_color, 
                      [pixel_map.rect.x, pixel_map.rect.y + row*pixel_size[1]], 
                      [pixel_map.rect.x + pixel_map.rect.w, pixel_map.rect.y + row*pixel_size[1]], 
-                     pixel_map.line_width)
+                     pixel_map.line_width)"""
 
         for column in range(pixel_map.pixel_dimensions[0]+1):
-
-            pg.draw.line(game_display, pixel_map.grid_line_color, [pixel_map.rect.x + column*pixel_size[0], pixel_map.rect.y], [pixel_map.rect.x + column*pixel_size[0], pixel_map.rect.y + pixel_map.rect.h], pixel_map.line_width)
+            
+            """pg.draw.line(game_display, 
+                         pixel_map.grid_line_color, 
+                         [pixel_map.rect.x + column*pixel_size[0], pixel_map.rect.y], 
+                         [pixel_map.rect.x + column*pixel_size[0], pixel_map.rect.y + pixel_map.rect.h], 
+                         pixel_map.line_width)"""
+            pass
             #draw_cell(game_display, pixel_map.pixels[row][column].rect, pixel_map.line_color, pixel_map.line_width)
 
     # Draw the pixels

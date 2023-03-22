@@ -7,7 +7,7 @@ import pygame as pg
 
 # TODO: come up with a better name
 class Saver:
-    def __init__(self, file_name : str='image_out', extension : str='.png',location : str='E:/Personligt/pixel/saved_images/'):
+    def __init__(self, file_name : str='image_out', extension : str='.png',location : str='../pixel/saved_images/'):
         self.file_name = file_name
         self.extension = extension
         self.location = location
