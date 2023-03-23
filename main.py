@@ -3,7 +3,6 @@ import pygame as pg
 import sys
 
 if __name__ == "__main__":  
-    ex.init()
-    ex.run_application() 
+    ex.run_application(ex.init()) 
     pg.quit()
     sys.exit()

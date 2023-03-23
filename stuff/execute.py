@@ -41,12 +41,15 @@ def init():
     
     saver = sv.Saver()
     
-    internal_window = lo.InternalWindow(pg.Rect(100,100,100,100))
+    internal_window = lo.InternalWindow(pg.Rect(h.s_W/2-75,h.s_H/2-15,150,30))
     
-    interf_.interface.add_pixelmap(pixel_map)
-    interf_.interface.add_toolbox(tool_box)
-    interf_.interface.add_saver(saver)
-    interf_.interface.add_internal_window(internal_window)
+    Interface = interf_.Interface()
+    Interface.add_pixelmap(pixel_map)
+    Interface.add_toolbox(tool_box)
+    Interface.add_saver(saver)
+    Interface.add_internal_window(internal_window)
+
+    return Interface
 
 
 def buttons_pressed(buttons : list, mouse_pos, left_mouse_btn_pressed):
@@ -65,7 +68,7 @@ def buttons_hovered(buttons : list, mouse_pos, left_mouse_btn_pressed):
             pass
         
 
-def run_application():
+def run_application(Interface : interf_.Interface):
     """The game loop"""
 
     # Create the game display
@@ -80,21 +83,26 @@ def run_application():
     side = 20
     button1 = lo.Button(pg.Rect(4,4,side,side),h.white,h.white,h.white)
     button1.action = MethodType(lo.change_pen_color,button1)
+    button1.add_action_arguments({'tool_box' : Interface.tool_box})
     
     button2 = lo.Button(pg.Rect(8+side,4,side,side),h.black,h.black,h.white)
     button2.action = MethodType(lo.change_pen_color,button2)
+    button2.add_action_arguments({'tool_box' : Interface.tool_box})
     
     button3 = lo.Button(pg.Rect(12+2*side,4,side,side),h.blue,h.blue,h.white)
     button3.action = MethodType(lo.change_pen_color,button3)
+    button3.add_action_arguments({'tool_box' : Interface.tool_box})
     
     button4 = lo.Button(pg.Rect(16+3*side,4,side,side),h.red,h.red,h.white)
     button4.action = MethodType(lo.change_pen_color,button4)
+    button4.add_action_arguments({'tool_box' : Interface.tool_box})
     
     button_c = lo.Button(pg.Rect(h.s_W-side-20,5,side + 15,side),h.red,h.light_red,h.white)
     button_c.action = MethodType(lo.close_window,button_c)
     
     button_s = lo.Button(pg.Rect(h.s_W-side- 40 - side,5,side + 15,side),h.blue,h.light_blue,h.white)
-    button_s.action = interf_.interface.saver.save_as_png
+    button_s.action = Interface.saver.save_as_png
+    button_s.add_action_arguments({'pixel_map' : Interface.pixel_map})
     
     buttons = [button1, button2, button3, button4]
     
@@ -103,7 +111,8 @@ def run_application():
     # FIXME:
     user_input = ''
     base_font = pg.font.Font(None, 20)
-    input_rect = interf_.interface.internal_windows['new_window'].rect
+    input_rect = Interface.internal_windows['new_window'].rect
+    saving = False
     
     while running:
         
@@ -126,7 +135,7 @@ def run_application():
                 left_mouse_btn_pressed = True
                 
                 # Fill the pixel, if one is pressed
-                interf_.interface.tool_box.get_active_tool().fill_pixels(interf_.interface.pixel_map, mouse_pos)
+                Interface.tool_box.get_active_tool().fill_pixels(Interface.pixel_map, mouse_pos)
 
                 # Handle button presses if there are any
                 buttons_pressed(buttons,mouse_pos,left_mouse_btn_pressed) 
@@ -139,10 +148,11 @@ def run_application():
                     pass
 
                 # FIXME:
-                if interf_.interface.internal_windows['new_window'].rect.collidepoint(event.pos):
-                    interf_.interface.internal_windows['new_window'].set_active(True)
-                else: 
-                    interf_.interface.internal_windows['new_window'].set_active(False)
+                if Interface.internal_windows['new_window'].rect.collidepoint(event.pos) and saving:
+                    Interface.internal_windows['new_window'].set_active(True)
+                elif not Interface.internal_windows['new_window'].rect.collidepoint(event.pos) and saving: 
+                    Interface.internal_windows['new_window'].set_active(False)
+                    saving = False
             
             # If the left mouse button is released
             if event.type == pg.MOUSEBUTTONUP and event.button == 1:
@@ -156,15 +166,17 @@ def run_application():
                 if button_c.on_clicked(mouse_pos,left_mouse_btn_pressed):
                     pass
                 
-                if button_s.on_clicked(mouse_pos,left_mouse_btn_pressed):
+                if button_s.is_clicked(mouse_pos,left_mouse_btn_pressed):
+                    saving = True
+                    user_input = Interface.saver.file_name
                     pass
 
             # If a key is pressed
             if event.type == pg.KEYDOWN:
                 
                 # FIXME:
-                for internal_window_name, internal_window in interf_.interface.internal_windows.items():
-                    if internal_window.active and event.key != pg.K_BACKSPACE:
+                for internal_window_name, internal_window in Interface.internal_windows.items():
+                    if internal_window.active and event.key != pg.K_BACKSPACE and event.key != pg.K_RETURN:
                         user_input += event.unicode
                     elif internal_window.active and event.key == pg.K_BACKSPACE:
                         user_input = user_input[:-1]
@@ -172,37 +184,49 @@ def run_application():
                 # If the pressed key is C
                 if event.key == pg.K_c:
                     # Clear the pixel_map
-                    rd.clear_pixelmap(interf_.interface.pixel_map)
+                    rd.clear_pixelmap(Interface.pixel_map)
                     
                 # If the pressed key is S
                 if event.key == pg.K_s: 
                     # Save image as png
-                    interf_.interface.saver.save_as_png()
+                    Interface.saver.save_as_png(Interface.pixel_map)
+
+                # If the pressed key is ENTER
+                if event.key == pg.K_RETURN and saving: 
+                    Interface.saver.set_filename(user_input)
+                    Interface.saver.save_as_png(Interface.pixel_map)
+                    user_input = ''
+                    saving = False
+                       
 
                 
         # Blit the pixelmap                
-        rd.blit_pixelmap(game_display, interf_.interface.pixel_map)
+        rd.blit_pixelmap(game_display, Interface.pixel_map)
 
         # Blit a cell around the hovered pixel to highlight it
-        hovered_pixel = interf_.interface.pixel_map.get_pixel(mouse_pos)
+        hovered_pixel = Interface.pixel_map.get_pixel(mouse_pos)
         if hovered_pixel:
-            rd.draw_cell(game_display, hovered_pixel.rect, interf_.interface.pixel_map.line_color, 2)
+            rd.draw_cell(game_display, hovered_pixel.rect, Interface.pixel_map.line_color, 2)
         
         # Draw the container
         rd.draw_container(game_display, btn_container)
-        # Draw all the buttons
-        rd.draw_buttons(game_display, buttons, mouse_pos, left_mouse_btn_pressed)
         
+        # Draw all the buttons
+        rd.draw_buttons(game_display, btn_container.objects, mouse_pos, left_mouse_btn_pressed)
 
         # TODO: fix this
         rd.draw_button(game_display, button_c, mouse_pos, left_mouse_btn_pressed)
         rd.draw_button(game_display, button_s, mouse_pos, left_mouse_btn_pressed)
         
-
         # FIXME: 
-        rd.draw_internal_window(game_display,interf_.interface.internal_windows['new_window'])
-        text_surface = base_font.render(user_input, True, (255, 255, 255))
-        game_display.blit(text_surface, (input_rect.x+5, input_rect.y+5))
+        if saving:
+            Interface.internal_windows['new_window'].set_active(True)
+        else:
+            Interface.internal_windows['new_window'].set_active(False)
+        if Interface.internal_windows['new_window'].active:
+            rd.draw_internal_window(game_display,Interface.internal_windows['new_window'])
+            text_surface = base_font.render(user_input, True, (255, 255, 255))
+            game_display.blit(text_surface, (input_rect.x+5, input_rect.y+5))
         
 
         # Handle button hovers if there are any

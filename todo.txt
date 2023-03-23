@@ -1,5 +1,7 @@
 Backlog:
 * Jag vill ha så att man kan klicka ctrl z för att stega tillbaka
+* När man sparar filen ska man även kunna välja vilken filtyp
+* När man sparar filen ska man kunna välja location genom att klicka påbrowse och sen i utforskaren söka sig fram
 * Jag vill ha en animation timeline där man kan välja fps, stega igenom med en slider och välja specifika frames beroende på var man vill måla.
 * Det ska kunna gå att spara animation eller en enskild frame som en en grupp av/enskilda png/jpg eller som en gif.
 * Jag vill ha ett färghjul där man kan välja färg.
@@ -8,8 +10,6 @@ Backlog:
 * Jag vill ha ett pipettverktyg
 * Jag vill ha ett suddgummi
 * Det ska kunna gå att se vilken färg som är vald, både som en markör vid paletten men också i ett specifikt fönster där aktuell färg visas
-* Fix a global class for the important instances(pixel_map, tool_box, etc)
-* Sök upp hur man åtgärdar "circular import errors"
 * Alla useractions ska inte kunna vara aktiva vid alla tillfällen. Ha internal windows där man kan koppla useractions
 
 Current Sprint
@@ -20,3 +20,7 @@ Finished:
 * Jag vill att en ruta markeras om muspekaren är över den, så man vet vilken pixel som målas i när man trycker
 * Jag vill ha ett litet UI där man kan välja färg. Det ska vara utifrån default färgvärden.
 * Det ska kunna gå att spara ned det som finns på skärmen til en fil som en png vid ett knapptryck
+* Få bort den globala objectet interface
+
+Scrapyard:
+* Fix a global class for the important instances(pixel_map, tool_box, etc)

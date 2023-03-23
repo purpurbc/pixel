@@ -2,7 +2,6 @@ from stuff import helpers as h
 from stuff import pixel_map as pm
 from stuff import tools as tl
 from PIL import Image
-from stuff import interface as interf_
 import pygame as pg
 
 # TODO: come up with a better name
@@ -21,14 +20,14 @@ class Saver:
     def set_location(self, location : str):
         self.location = location
         
-    def save_as_png(self):
+    def save_as_png(self, pixel_map):
         print("SAVING IMAGE...")
         
         # Create image
-        image_out = Image.new(mode='RGBA',size=interf_.interface.pixel_map.pixel_dimensions)
+        image_out = Image.new(mode='RGBA',size=pixel_map.pixel_dimensions)
         
         # Get the pixels from the pixelmap in the right format
-        pixels = interf_.interface.pixel_map.get_png_pixels()
+        pixels = pixel_map.get_png_pixels()
         
         # Put the pixels onto the image
         image_out.putdata(pixels)

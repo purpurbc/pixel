@@ -40,4 +40,3 @@ class ToolBox:
     def get_active_tool(self):
         return self.tools[self.active_tool]
     
-tool_box = ToolBox()

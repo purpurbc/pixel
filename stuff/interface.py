@@ -28,5 +28,3 @@ class Interface:
     def delete_internal_window(self, internal_window):
         del self.internal_windows[internal_window.name]
         
-    
-interface = Interface()

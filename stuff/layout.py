@@ -1,6 +1,5 @@
 import pygame as pg
 from stuff import helpers as h
-from stuff import interface as interf_
 
 
 # TODO: Move these functions to a proper class/file
@@ -8,8 +7,11 @@ def close_window(self):
     print("CLOSING WINDOW...")
     pg.event.post(pg.event.Event(pg.QUIT))
     
-def change_pen_color(self):
-    interf_.interface.tool_box.get_active_tool().color = self.color
+def change_pen_color(self, tool_box):
+    try:
+        tool_box.get_active_tool().color = self.color
+    except KeyError:
+        pass
       
 
 class Button:
@@ -29,6 +31,11 @@ class Button:
         self.action = None
         self.image_element = None
         self.was_pressed = False
+        self.action_arguments = dict()
+
+    def add_action_arguments(self,action_arguments : dict):
+        for key, value in action_arguments.items():
+            self.action_arguments[key] = value
         
     def set_pressed(self, state : bool):
         self.was_pressed = state
@@ -75,7 +82,7 @@ class Button:
             the button WAS pressed initially."""
         if self.is_clicked(mouse_pos, left_mouse_btn_pressed) and self.action:
             # Perform the action and set was_pressed to True
-            self.action()
+            self.action(**self.action_arguments)
             self.set_pressed(False)
             return True
         return False 
