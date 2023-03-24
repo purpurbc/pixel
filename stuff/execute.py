@@ -9,6 +9,13 @@ from stuff import interface as interf_
 from types import MethodType
 import copy
 from PIL import Image
+from configparser import ConfigParser
+import tomli
+
+with open("palettes.toml", mode="rb") as fp:
+    palettes = tomli.load(fp)
+for key, value in palettes['DEFAULT_PALETTE'].items():
+        palettes['DEFAULT_PALETTE'][key] = tuple(value)
 
 
 def init():
@@ -32,11 +39,13 @@ def init():
     # Create the pixelmap
     x = 10
     s = 500
-    pixel_map = pm.PixelMap((int(s/x),int(s/x)), pg.Rect(250,50,s,s))
-    
+    pixel_map = pm.PixelMap((int(s/x),int(s/x)), lo.Structure(pg.Rect(250,50,s,s),h.grey,h.dark_grey,3))
+
     pen = tl.Pen()
+    pen_plus = tl.Pen([[0,1,0],[1,1,1],[0,1,0]],[1,1])
     tool_box = tl.ToolBox()
     tool_box.add_tool('pen',pen)
+    tool_box.add_tool('pen_plus',pen_plus)
     tool_box.set_active_tool('pen')
     
     saver = sv.Saver()
@@ -66,7 +75,34 @@ def buttons_hovered(buttons : list, mouse_pos, left_mouse_btn_pressed):
     for btn in buttons:
         if btn.on_hovered(mouse_pos,left_mouse_btn_pressed):
             pass
-        
+
+
+# TODO: find a place for this 
+# FIXME: OPTIMIZE!!!
+def create_palette_container( palette : pm.Palette, structure : lo.Structure, tool_box : tl.ToolBox):
+    paints = []
+    rect = structure.rect
+    paint_size = [20,20] #TODO add a proper define
+    margin = 2
+    num_columns = int(rect.w/(paint_size[0]+2*margin))
+    print(num_columns)
+    column = 0
+    paint_pos = [margin,margin]
+    for paint_name, paint_color in palette.colors.items():
+        paint_btn = lo.Button(lo.Structure(pg.Rect(paint_pos[0], paint_pos[1], paint_size[0], paint_size[1]), paint_color), paint_color, h.WHITE)
+        paint_btn.action = MethodType(lo.change_pen_color, paint_btn)
+        paint_btn.add_action_arguments({'tool_box' : tool_box, 'color': paint_color})
+        paints.append(paint_btn)
+        column += 1
+        if column >= num_columns:
+            paint_pos[1] = paint_pos[1] + (paint_size[1] + margin)
+            paint_pos[0] = margin
+            column = 0
+        else:
+            paint_pos[0] = paint_pos[0] + (paint_size[0] + margin)
+    palette_container = lo.Container(structure,paints)
+    return palette_container
+
 
 def run_application():
     """The game loop"""
@@ -84,30 +120,35 @@ def run_application():
     
     # TEST PALETTE
     side = 20
-    button1 = lo.Button(lo.Structure(pg.Rect(4,4,side,side),h.white),h.white,h.white)
+    """button1 = lo.Button(lo.Structure(pg.Rect(4,4,side,side),h.WHITE),h.WHITE,h.WHITE)
     button1.action = MethodType(lo.change_pen_color,button1)
-    button1.add_action_arguments({'tool_box' : Interface.tool_box, 'color': h.white})
+    button1.add_action_arguments({'tool_box' : Interface.tool_box, 'color': h.WHITE})
     
-    button2 = lo.Button(lo.Structure(pg.Rect(8+side,4,side,side),h.black),h.black,h.white)
+    button2 = lo.Button(lo.Structure(pg.Rect(8+side,4,side,side),h.black),h.black,h.WHITE)
     button2.action = MethodType(lo.change_pen_color,button2)
     button2.add_action_arguments({'tool_box' : Interface.tool_box, 'color': h.black})
     
-    button3 = lo.Button(lo.Structure(pg.Rect(12+2*side,4,side,side),h.blue),h.blue,h.white)
+    button3 = lo.Button(lo.Structure(pg.Rect(12+2*side,4,side,side),h.blue),h.blue,h.WHITE)
     button3.action = MethodType(lo.change_pen_color,button3)
     button3.add_action_arguments({'tool_box' : Interface.tool_box, 'color': h.blue})
     
-    button4 = lo.Button(lo.Structure(pg.Rect(16+3*side,4,side,side),h.red),h.red,h.white)
+    button4 = lo.Button(lo.Structure(pg.Rect(16+3*side,4,side,side),h.red),h.red,h.WHITE)
     button4.action = MethodType(lo.change_pen_color,button4)
-    button4.add_action_arguments({'tool_box' : Interface.tool_box, 'color': h.red})
+    button4.add_action_arguments({'tool_box' : Interface.tool_box, 'color': h.red})"""
     
-    buttons = [button1, button2, button3, button4]
-    btn_container = lo.Container(lo.Structure(pg.Rect(50,50,100,500)),buttons)
+    #buttons = [button1, button2, button3, button4]
+    #btn_container = lo.Container(lo.Structure(pg.Rect(50,50,100,500)),buttons)
+
+
+    palette = pm.Palette('default',palettes['DEFAULT_PALETTE'])
+    btn_container = create_palette_container(palette, lo.Structure(pg.Rect(50,50,100,500)), Interface.tool_box)
+
 
     # SAVE_AS AND QUIT BUTTONS
-    button_c = lo.Button(lo.Structure(pg.Rect(h.s_W-side-20,5,side + 15,side),h.red),h.light_red,h.white)
+    button_c = lo.Button(lo.Structure(pg.Rect(h.s_W-side-20,5,side + 15,side),h.red),h.light_red,h.WHITE)
     button_c.action = MethodType(lo.close_window,button_c)
     
-    button_s = lo.Button(lo.Structure(pg.Rect(h.s_W-side- 40 - side,5,side + 15,side),h.blue),h.light_blue,h.white)
+    button_s = lo.Button(lo.Structure(pg.Rect(h.s_W-side- 40 - side,5,side + 15,side),h.blue),h.light_blue,h.WHITE)
     button_s.action = Interface.set_active_internal_window
     button_s.add_action_arguments({'window_name' : 'save_as_filename', 'active' : True})
 
@@ -142,7 +183,7 @@ def run_application():
                 Interface.tool_box.get_active_tool().fill_pixels(Interface.pixel_map, mouse_pos)
 
                 # Handle button presses if there are any
-                buttons_pressed(buttons,mouse_pos,left_mouse_btn_pressed) 
+                buttons_pressed(btn_container.objects,mouse_pos,left_mouse_btn_pressed) 
                 
                 # TODO: fix this
                 if button_c.on_pressed(mouse_pos,left_mouse_btn_pressed):
@@ -164,7 +205,7 @@ def run_application():
                 left_mouse_btn_pressed = False
                 
                 # Handle button clicks if there are any
-                buttons_clicked(buttons,mouse_pos,left_mouse_btn_pressed)
+                buttons_clicked(btn_container.objects,mouse_pos,left_mouse_btn_pressed)
                 
                 # TODO: fix this
                 if button_c.on_clicked(mouse_pos,left_mouse_btn_pressed):
@@ -188,6 +229,14 @@ def run_application():
                 if event.key == pg.K_c:
                     # Clear the pixel_map
                     rd.clear_pixelmap(Interface.pixel_map)
+                
+                # If the pressed key is B
+                if event.key == pg.K_b:
+                    # Clear the pixel_map
+                    if Interface.tool_box.active_tool == 'pen':
+                        Interface.tool_box.set_active_tool('pen_plus')
+                    else:
+                        Interface.tool_box.set_active_tool('pen')
                     
                 # If the pressed key is S
                 if event.key == pg.K_s: 
@@ -209,18 +258,18 @@ def run_application():
         # Blit a cell around the hovered pixel to highlight it
         hovered_pixel = Interface.pixel_map.get_pixel(mouse_pos)
         if hovered_pixel:
-            rd.draw_cell(game_display, hovered_pixel.rect, Interface.pixel_map.line_color, 2)
+            rd.draw_cell(game_display, hovered_pixel.rect, Interface.pixel_map.structure.line_color, 2)
         
         # Draw the container
         rd.draw_container(game_display, btn_container)
         
         # Draw all the buttons
-        rd.draw_buttons(game_display, buttons, mouse_pos, left_mouse_btn_pressed)
+        rd.draw_buttons(game_display, btn_container.objects, mouse_pos, left_mouse_btn_pressed)
         # Handle button hovers if there are any
         #buttons_hovered(buttons,mouse_pos,left_mouse_btn_pressed)
         
         # FIXME
-        for btn in buttons:
+        for btn in btn_container.objects:
             try: 
                 if Interface.tool_box.get_active_tool().color == btn.action_arguments['color']:
                     rd.draw_cell(game_display, btn.structure.rect, h.yellow, 2)

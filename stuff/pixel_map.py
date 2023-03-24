@@ -1,8 +1,13 @@
-
 import collections
 from stuff import helpers as h
+from stuff import layout as lo
 import pygame as pg
 
+# TODO: find a place for this class
+class Palette:
+    def __init__(self, name : str, colors : dict): 
+        self.name = name
+        self.colors = colors # -> {'color_name' : RGBA-tuple, 'color_name_2' : RGBA-tuple ... }
 
 class Pixel:
     def __init__(self, rect, color=None):
@@ -11,15 +16,12 @@ class Pixel:
         self.previous_color = None
 
 class PixelMap:
-    def __init__(self, pixel_dims, rect):
-        pixel_size = [rect.w/pixel_dims[1], rect.h/pixel_dims[0]]
-        self.pixels = [[Pixel(pg.Rect(rect.x + i*pixel_size[0], rect.y + j*pixel_size[1], pixel_size[0], pixel_size[1])) for i in range(pixel_dims[0])] for j in range(pixel_dims[1])]
+    def __init__(self, pixel_dims, structure : lo.Structure):
+        pixel_size = [structure.rect.w/pixel_dims[1], structure.rect.h/pixel_dims[0]]
+        self.pixels = [[Pixel(pg.Rect(structure.rect.x + i*pixel_size[0], structure.rect.y + j*pixel_size[1], pixel_size[0], pixel_size[1])) for i in range(pixel_dims[0])] for j in range(pixel_dims[1])]
         self.pixel_dimensions = pixel_dims
-        self.rect = rect
-        self.background_color = h.grey
-        self.line_color = h.dark_grey
+        self.structure = structure
         self.grid_line_color = h.medium_grey
-        self.line_width = 2
 
     def get_pixel(self, pos : tuple) -> pg.Rect:
         """ Get the rect of the pixel from the pixel_map. The rect encapsulates the pos"""
@@ -28,8 +30,8 @@ class PixelMap:
         pixel_rect = self.pixels[0][0].rect
 
         # Find the right column and row
-        column = ((pos[0] - self.rect.x)/pixel_rect.w)
-        row = ((pos[1] - self.rect.y)/pixel_rect.h)
+        column = ((pos[0] - self.structure.rect.x)/pixel_rect.w)
+        row = ((pos[1] - self.structure.rect.y)/pixel_rect.h)
 
         # Check so that the pixel is in the pixelmap
         if (column >= self.pixel_dimensions[1] or column < 0) or (row >= self.pixel_dimensions[0] or row < 0):

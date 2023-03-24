@@ -49,9 +49,9 @@ def draw_pixelmap(game_display, pixel_map : pm.PixelMap):
 
     pixel_size = pixel_map.get_pixel_size()
     
-    pg.draw.rect(game_display, pixel_map.background_color, pixel_map.rect)
+    pg.draw.rect(game_display, pixel_map.structure.color, pixel_map.structure.rect)
 
-    draw_cell(game_display,pixel_map.rect,pixel_map.line_color,pixel_map.line_width)       
+    draw_cell(game_display, pixel_map.structure.rect, pixel_map.structure.line_color, pixel_map.structure.line_width)       
     
     # Draw the grid 
     for row in range(pixel_map.pixel_dimensions[1]+1):

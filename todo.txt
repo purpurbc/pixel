@@ -4,8 +4,6 @@ Backlog:
 * När man sparar filen ska man kunna välja location genom att klicka påbrowse och sen i utforskaren söka sig fram
 * Jag vill ha en animation timeline där man kan välja fps, stega igenom med en slider och välja specifika frames beroende på var man vill måla.
 * Det ska kunna gå att spara animation eller en enskild frame som en en grupp av/enskilda png/jpg eller som en gif.
-* Jag vill ha ett färghjul där man kan välja färg.
-* Jag vill att man ska kunna spara en färg i paletten
 * Jag vill ha att man kan ha flera olika paletter med grupper av färgvärden
 * Jag vill ha ett pipettverktyg
 * Jag vill ha ett suddgummi
@@ -13,7 +11,8 @@ Backlog:
 * Alla useractions ska inte kunna vara aktiva vid alla tillfällen. Ha internal windows där man kan koppla useractions
 
 Current Sprint
-
+* Jag vill att man ska kunna spara en färg i paletten, dvs dynamiskt kunna lägga till färger och välja dem(skriva in rgb)
+* Jag vill ha ett färghjul där man kan välja färg.
 
 Finished:
 * Jag vill ha en custom muspekare istället för den vanliga
@@ -22,7 +21,7 @@ Finished:
 * Det ska kunna gå att spara ned det som finns på skärmen til en fil som en png vid ett knapptryck
 * Få bort den globala objectet interface
 * När man sparar objektet ska man behöva skriva in namn på filen 
+* Fix a global class for the important instances(pixel_map, tool_box, etc)
 * Det ska kunna gå att se vilken färg som är vald, både som en markör vid paletten men också i ett specifikt fönster där aktuell färg visas
 
 Scrapyard:
-* Fix a global class for the important instances(pixel_map, tool_box, etc)

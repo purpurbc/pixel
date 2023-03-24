@@ -28,7 +28,7 @@ class Button:
     3. button.action = MethodType(action_name, button) # Attach function to button
     4. button.action() # Perform action/function
     """
-    def __init__(self,structure : Structure, rect : pg.Rect, color=h.red, hovered_color=h.light_red, pressed_color=h.white):
+    def __init__(self,structure : Structure, hovered_color=h.light_red, pressed_color=h.WHITE):
         self.structure = structure
         self.action = None
         self.action_arguments = dict()
@@ -110,7 +110,7 @@ class Container:
         button.structure.rect.x, button.structure.rect.y = global_coords[0], global_coords[1]
         self.objects.append(button)
         
-        
+
 class TextArea:
     def __init__(self, rect):
         self.rect = rect
@@ -137,6 +137,6 @@ class InternalWindow:
         if active:
             self.window_structure.line_color = h.dark_grey
         else:
-            self.window_structure.line_color = h.white
+            self.window_structure.line_color = h.WHITE
 
 
