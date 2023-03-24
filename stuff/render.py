@@ -51,6 +51,8 @@ def draw_pixelmap(game_display, pixel_map : pm.PixelMap):
     
     pg.draw.rect(game_display, pixel_map.background_color, pixel_map.rect)
 
+    draw_cell(game_display,pixel_map.rect,pixel_map.line_color,pixel_map.line_width)       
+    
     # Draw the grid 
     for row in range(pixel_map.pixel_dimensions[1]+1):
 
@@ -79,7 +81,7 @@ def draw_pixelmap(game_display, pixel_map : pm.PixelMap):
 
                 pg.draw.rect(game_display, pixel_map.pixels[row][column].color, pixel_map.pixels[row][column].rect) 
     
-    draw_cell(game_display,pixel_map.rect,pixel_map.line_color,pixel_map.line_width)       
+    
 
     
 
@@ -98,24 +100,30 @@ def draw_buttons(game_display, buttons : list, mouse_pos, left_mouse_btn_pressed
 
 def draw_button(game_display, button : lo.Button, mouse_pos, left_mouse_btn_pressed : bool):
     if button.is_hovered(mouse_pos,left_mouse_btn_pressed):
-        pg.draw.rect(game_display, button.hovered_color, button.rect)
+        pg.draw.rect(game_display, button.hovered_color, button.structure.rect)
     elif button.is_pressed(mouse_pos,left_mouse_btn_pressed):
-        pg.draw.rect(game_display, button.pressed_color, button.rect)
+        pg.draw.rect(game_display, button.pressed_color, button.structure.rect)
     else:
-        pg.draw.rect(game_display, button.color, button.rect)
+        pg.draw.rect(game_display, button.structure.color, button.structure.rect)
     
         
 def draw_container(game_display, container : lo.Container):
     #TODO: create Surface and blit that instead. Can use alpha values
-    pg.draw.rect(game_display, container.color, container.rect)
+    pg.draw.rect(game_display, container.structure.color, container.structure.rect)
 
     
 
 
 def draw_internal_window(game_display, internal_window : lo.InternalWindow):
     #TODO: create Surface and blit that instead. Can use alpha values
-    pg.draw.rect(game_display, internal_window.color, internal_window.rect)
-    draw_cell(game_display, internal_window.rect, internal_window.line_color, internal_window.line_width)
+    win_struct = internal_window.window_structure
+    pg.draw.rect(game_display, win_struct.color, win_struct.rect)
+    draw_cell(game_display, win_struct.rect, win_struct.line_color, win_struct.line_width)
+
+def draw_internal_windows(game_display, internal_windows : dict):
+    for name, window in internal_windows.items():
+        if window.active:
+            draw_internal_window(game_display, window)
 
 
 def blit_pixelmap(game_display, pixel_map):

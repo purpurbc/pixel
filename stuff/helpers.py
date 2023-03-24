@@ -19,6 +19,7 @@ blue = (51,169,205,255)
 light_blue = (81,199,235,255)
 red = (220,20,20,255)
 light_red = (220,100,100,255)
+yellow = (255,223,6,255)
 
 """# optional text
 font = pg.font.Font("freesansbold.ttf", 32) 

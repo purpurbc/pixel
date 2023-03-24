@@ -7,12 +7,18 @@ def close_window(self):
     print("CLOSING WINDOW...")
     pg.event.post(pg.event.Event(pg.QUIT))
     
-def change_pen_color(self, tool_box):
-    try:
-        tool_box.get_active_tool().color = self.color
-    except KeyError:
-        pass
-      
+def change_pen_color(self, tool_box, color):
+    tool_box.get_active_tool().color = color
+    
+def save_as(self, saver, pixel_map, internal_window):
+    pass
+
+class Structure:
+    def __init__(self, rect, color = h.grey_2, line_color = h.black, line_width = 3):
+        self.rect = rect
+        self.color = color
+        self.line_color = line_color
+        self.line_width = line_width
 
 class Button:
     """
@@ -22,17 +28,17 @@ class Button:
     3. button.action = MethodType(action_name, button) # Attach function to button
     4. button.action() # Perform action/function
     """
-    def __init__(self, rect : pg.Rect, color=h.red, hovered_color=h.light_red, pressed_color=h.white):
-        self.rect = rect
-        self.color = color
+    def __init__(self,structure : Structure, rect : pg.Rect, color=h.red, hovered_color=h.light_red, pressed_color=h.white):
+        self.structure = structure
+        self.action = None
+        self.action_arguments = dict()
+        self.was_pressed = False
         self.hovered_color = hovered_color
         self.pressed_color = pressed_color
-        self.image = None
-        self.action = None
-        self.image_element = None
-        self.was_pressed = False
-        self.action_arguments = dict()
-
+        
+        self.image = None           # TODO: implement
+        self.image_element = None   # TODO: implement
+        
     def add_action_arguments(self,action_arguments : dict):
         for key, value in action_arguments.items():
             self.action_arguments[key] = value
@@ -42,10 +48,10 @@ class Button:
 
     # IS methods, either True or False
     def is_hovered(self, mouse_pos, left_mouse_btn_pressed):
-        return True if self.rect.collidepoint(mouse_pos) and not left_mouse_btn_pressed else False
+        return True if self.structure.rect.collidepoint(mouse_pos) and not left_mouse_btn_pressed else False
     
     def is_pressed(self,mouse_pos, left_mouse_btn_pressed):
-        return True if self.rect.collidepoint(mouse_pos) and left_mouse_btn_pressed else False
+        return True if self.structure.rect.collidepoint(mouse_pos) and left_mouse_btn_pressed else False
     
     def is_released(self, mouse_pos, left_mouse_btn_pressed):
         return True if not self.was_pressed and self.is_hovered(mouse_pos,left_mouse_btn_pressed) and not left_mouse_btn_pressed else False
@@ -88,19 +94,20 @@ class Button:
         return False 
 
 
+
+
 class Container:
-    def __init__(self, rect, objects : list = []):
-        self.rect = rect
+    def __init__(self, structure : Structure, objects : list = []):
+        self.structure = structure
+
         self.objects = []
         for obj in objects:
-            self.add_button(obj, [obj.rect.x, obj.rect.y])
-        self.color = h.grey_2
-        self.line_color = h.black
-        self.line_width = 3
+            self.add_button(obj, [obj.structure.rect.x, obj.structure.rect.y])
+        
         
     def add_button(self, button : Button, local_coords):
-        global_coords = h.get_global_coords(self.rect, local_coords)
-        button.rect.x, button.rect.y = global_coords[0], global_coords[1]
+        global_coords = h.get_global_coords(self.structure.rect, local_coords)
+        button.structure.rect.x, button.structure.rect.y = global_coords[0], global_coords[1]
         self.objects.append(button)
         
         
@@ -113,22 +120,23 @@ class InputArea:
         self.rect = rect
         
 class InternalWindow:
-    def __init__(self, rect : pg.Rect, name : str='new_window'):
-        self.rect = rect
-        self.color = h.dark_grey
-        self.line_color = h.white
-        self.line_width = 3
+    def __init__(self, window_structure : Structure, name : str='DEFAULT_NAME'):
+        self.window_structure = window_structure
         self.name = name
         self.active = False
+        self.containers = []
         
     def highlight_window(self):
         pass
+
+    def add_container(self,container):
+        self.containers.append(container)
     
     def set_active(self, active):
         self.active = active
         if active:
-            self.line_color = h.light_red
+            self.window_structure.line_color = h.dark_grey
         else:
-            self.line_color = h.white
+            self.window_structure.line_color = h.white
 
 

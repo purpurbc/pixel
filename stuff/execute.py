@@ -41,8 +41,8 @@ def init():
     
     saver = sv.Saver()
     
-    internal_window = lo.InternalWindow(pg.Rect(h.s_W/2-75,h.s_H/2-15,150,30))
-    
+    internal_window = lo.InternalWindow(lo.Structure(pg.Rect(h.s_W - 235, 5,150,20),line_width=2),name='save_as_filename')
+
     Interface = interf_.Interface()
     Interface.add_pixelmap(pixel_map)
     Interface.add_toolbox(tool_box)
@@ -68,8 +68,10 @@ def buttons_hovered(buttons : list, mouse_pos, left_mouse_btn_pressed):
             pass
         
 
-def run_application(Interface : interf_.Interface):
+def run_application():
     """The game loop"""
+
+    Interface = init() 
 
     # Create the game display
     game_display = pg.display.set_mode(h.s_dimension) 
@@ -80,39 +82,41 @@ def run_application(Interface : interf_.Interface):
     h.cursor_image = pg.transform.scale(h.cursor_image, (20, 20))
     cursor_img_rect = h.cursor_image.get_rect()
     
+    # TEST PALETTE
     side = 20
-    button1 = lo.Button(pg.Rect(4,4,side,side),h.white,h.white,h.white)
+    button1 = lo.Button(lo.Structure(pg.Rect(4,4,side,side),h.white),h.white,h.white)
     button1.action = MethodType(lo.change_pen_color,button1)
-    button1.add_action_arguments({'tool_box' : Interface.tool_box})
+    button1.add_action_arguments({'tool_box' : Interface.tool_box, 'color': h.white})
     
-    button2 = lo.Button(pg.Rect(8+side,4,side,side),h.black,h.black,h.white)
+    button2 = lo.Button(lo.Structure(pg.Rect(8+side,4,side,side),h.black),h.black,h.white)
     button2.action = MethodType(lo.change_pen_color,button2)
-    button2.add_action_arguments({'tool_box' : Interface.tool_box})
+    button2.add_action_arguments({'tool_box' : Interface.tool_box, 'color': h.black})
     
-    button3 = lo.Button(pg.Rect(12+2*side,4,side,side),h.blue,h.blue,h.white)
+    button3 = lo.Button(lo.Structure(pg.Rect(12+2*side,4,side,side),h.blue),h.blue,h.white)
     button3.action = MethodType(lo.change_pen_color,button3)
-    button3.add_action_arguments({'tool_box' : Interface.tool_box})
+    button3.add_action_arguments({'tool_box' : Interface.tool_box, 'color': h.blue})
     
-    button4 = lo.Button(pg.Rect(16+3*side,4,side,side),h.red,h.red,h.white)
+    button4 = lo.Button(lo.Structure(pg.Rect(16+3*side,4,side,side),h.red),h.red,h.white)
     button4.action = MethodType(lo.change_pen_color,button4)
-    button4.add_action_arguments({'tool_box' : Interface.tool_box})
-    
-    button_c = lo.Button(pg.Rect(h.s_W-side-20,5,side + 15,side),h.red,h.light_red,h.white)
-    button_c.action = MethodType(lo.close_window,button_c)
-    
-    button_s = lo.Button(pg.Rect(h.s_W-side- 40 - side,5,side + 15,side),h.blue,h.light_blue,h.white)
-    button_s.action = Interface.saver.save_as_png
-    button_s.add_action_arguments({'pixel_map' : Interface.pixel_map})
+    button4.add_action_arguments({'tool_box' : Interface.tool_box, 'color': h.red})
     
     buttons = [button1, button2, button3, button4]
+    btn_container = lo.Container(lo.Structure(pg.Rect(50,50,100,500)),buttons)
+
+    # SAVE_AS AND QUIT BUTTONS
+    button_c = lo.Button(lo.Structure(pg.Rect(h.s_W-side-20,5,side + 15,side),h.red),h.light_red,h.white)
+    button_c.action = MethodType(lo.close_window,button_c)
     
-    btn_container = lo.Container(pg.Rect(50,50,100,500),buttons)
-    
+    button_s = lo.Button(lo.Structure(pg.Rect(h.s_W-side- 40 - side,5,side + 15,side),h.blue),h.light_blue,h.white)
+    button_s.action = Interface.set_active_internal_window
+    button_s.add_action_arguments({'window_name' : 'save_as_filename', 'active' : True})
+
+    # TEST INPUT
     # FIXME:
     user_input = ''
     base_font = pg.font.Font(None, 20)
-    input_rect = Interface.internal_windows['new_window'].rect
-    saving = False
+    input_rect = Interface.internal_windows['save_as_filename'].window_structure.rect
+    
     
     while running:
         
@@ -147,12 +151,12 @@ def run_application(Interface : interf_.Interface):
                 if button_s.on_pressed(mouse_pos,left_mouse_btn_pressed):
                     pass
 
-                # FIXME:
-                if Interface.internal_windows['new_window'].rect.collidepoint(event.pos) and saving:
-                    Interface.internal_windows['new_window'].set_active(True)
-                elif not Interface.internal_windows['new_window'].rect.collidepoint(event.pos) and saving: 
-                    Interface.internal_windows['new_window'].set_active(False)
-                    saving = False
+                # FIXME: 
+                active_window = Interface.get_active_internal_window()
+                if active_window:
+                    active_window_pressed = Interface.on_active_window_pressed(mouse_pos, left_mouse_btn_pressed)
+                    if active_window_pressed and active_window.name == 'save_as_filename':
+                        user_input = ''
             
             # If the left mouse button is released
             if event.type == pg.MOUSEBUTTONUP and event.button == 1:
@@ -166,8 +170,7 @@ def run_application(Interface : interf_.Interface):
                 if button_c.on_clicked(mouse_pos,left_mouse_btn_pressed):
                     pass
                 
-                if button_s.is_clicked(mouse_pos,left_mouse_btn_pressed):
-                    saving = True
+                if button_s.on_clicked(mouse_pos,left_mouse_btn_pressed):
                     user_input = Interface.saver.file_name
                     pass
 
@@ -192,17 +195,17 @@ def run_application(Interface : interf_.Interface):
                     Interface.saver.save_as_png(Interface.pixel_map)
 
                 # If the pressed key is ENTER
-                if event.key == pg.K_RETURN and saving: 
+                if event.key == pg.K_RETURN and Interface.internal_windows['save_as_filename'].active: 
                     Interface.saver.set_filename(user_input)
                     Interface.saver.save_as_png(Interface.pixel_map)
+                    Interface.set_active_internal_window('save_as_filename',False)
                     user_input = ''
-                    saving = False
                        
 
                 
         # Blit the pixelmap                
         rd.blit_pixelmap(game_display, Interface.pixel_map)
-
+        
         # Blit a cell around the hovered pixel to highlight it
         hovered_pixel = Interface.pixel_map.get_pixel(mouse_pos)
         if hovered_pixel:
@@ -212,25 +215,33 @@ def run_application(Interface : interf_.Interface):
         rd.draw_container(game_display, btn_container)
         
         # Draw all the buttons
-        rd.draw_buttons(game_display, btn_container.objects, mouse_pos, left_mouse_btn_pressed)
+        rd.draw_buttons(game_display, buttons, mouse_pos, left_mouse_btn_pressed)
+        # Handle button hovers if there are any
+        #buttons_hovered(buttons,mouse_pos,left_mouse_btn_pressed)
+        
+        # FIXME
+        for btn in buttons:
+            try: 
+                if Interface.tool_box.get_active_tool().color == btn.action_arguments['color']:
+                    rd.draw_cell(game_display, btn.structure.rect, h.yellow, 2)
+            except KeyError:
+                pass
 
         # TODO: fix this
         rd.draw_button(game_display, button_c, mouse_pos, left_mouse_btn_pressed)
         rd.draw_button(game_display, button_s, mouse_pos, left_mouse_btn_pressed)
         
-        # FIXME: 
-        if saving:
-            Interface.internal_windows['new_window'].set_active(True)
-        else:
-            Interface.internal_windows['new_window'].set_active(False)
-        if Interface.internal_windows['new_window'].active:
-            rd.draw_internal_window(game_display,Interface.internal_windows['new_window'])
-            text_surface = base_font.render(user_input, True, (255, 255, 255))
-            game_display.blit(text_surface, (input_rect.x+5, input_rect.y+5))
-        
+        # Draw the internal windows
+        rd.draw_internal_windows(game_display,Interface.internal_windows)
 
-        # Handle button hovers if there are any
-        buttons_hovered(buttons,mouse_pos,left_mouse_btn_pressed)
+
+        # FIXME:
+        active_window = Interface.get_active_internal_window()
+        if active_window:
+            if active_window.name == 'save_as_filename':
+                text_surface = base_font.render(user_input, True, (255, 255, 255))
+                game_display.blit(text_surface, (input_rect.x+5, input_rect.y+5))
+        
         
         # Blit the custom cursor
         cursor_img_rect.center = pg.mouse.get_pos()  # update position 
