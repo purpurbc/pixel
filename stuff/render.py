@@ -111,7 +111,13 @@ def draw_container(game_display, container : lo.Container):
     #TODO: create Surface and blit that instead. Can use alpha values
     pg.draw.rect(game_display, container.structure.color, container.structure.rect)
 
-    
+
+def draw_slider(game_display, slider : lo.Slider, mouse_pos, left_mouse_btn_pressed):
+    #TODO: create Surface and blit that instead. Can use alpha values
+    pg.draw.rect(game_display, slider.structure.color, slider.structure.rect)
+    draw_button(game_display, slider.button, mouse_pos, left_mouse_btn_pressed)
+
+
 
 
 def draw_internal_window(game_display, internal_window : lo.InternalWindow):

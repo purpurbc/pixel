@@ -158,11 +158,16 @@ def run_application():
     base_font = pg.font.Font(None, 20)
     input_rect = Interface.internal_windows['save_as_filename'].window_structure.rect
     
+    slider_structure = lo.Structure(pg.Rect(10,10,100,10))
+    slider = lo.Slider(slider_structure)
+    slider.button.action = slider.move_slider
+    slider.button.add_action_arguments({'mouse_pos' : Interface.mouse_pos})
     
     while running:
         
         # Continously update the mouse position
         mouse_pos = pg.mouse.get_pos()
+        Interface.set_mouse_pos(mouse_pos)
     
         # Handle events/input from the user
         for event in pg.event.get(): 
@@ -191,6 +196,9 @@ def run_application():
                 
                 if button_s.on_pressed(mouse_pos,left_mouse_btn_pressed):
                     pass
+                
+                if slider.button.on_pressed(mouse_pos,left_mouse_btn_pressed):
+                    pass
 
                 # FIXME: 
                 active_window = Interface.get_active_internal_window()
@@ -214,6 +222,9 @@ def run_application():
                 if button_s.on_clicked(mouse_pos,left_mouse_btn_pressed):
                     user_input = Interface.saver.file_name
                     pass
+                
+                if slider.button.on_clicked(mouse_pos,left_mouse_btn_pressed):
+                    pass
 
             # If a key is pressed
             if event.type == pg.KEYDOWN:
@@ -225,8 +236,8 @@ def run_application():
                     elif internal_window.active and event.key == pg.K_BACKSPACE:
                         user_input = user_input[:-1]
 
-                # If the pressed key is C
-                if event.key == pg.K_c:
+                # If the pressed key is DELETE
+                if event.key == pg.K_DELETE:
                     # Clear the pixel_map
                     rd.clear_pixelmap(Interface.pixel_map)
                 
@@ -241,7 +252,8 @@ def run_application():
                 # If the pressed key is S
                 if event.key == pg.K_s: 
                     # Save image as png
-                    Interface.saver.save_as_png(Interface.pixel_map)
+                    #Interface.saver.save_as_png(Interface.pixel_map)
+                    pass
 
                 # If the pressed key is ENTER
                 if event.key == pg.K_RETURN and Interface.internal_windows['save_as_filename'].active: 
@@ -283,7 +295,8 @@ def run_application():
         # Draw the internal windows
         rd.draw_internal_windows(game_display,Interface.internal_windows)
 
-
+        rd.draw_slider(game_display,slider, mouse_pos, left_mouse_btn_pressed)
+        
         # FIXME:
         active_window = Interface.get_active_internal_window()
         if active_window:

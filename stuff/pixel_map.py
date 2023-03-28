@@ -58,4 +58,3 @@ class PixelMap:
                     color = (0,0,0,0)
                 pixels.append(color)
         return pixels
-    

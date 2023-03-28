@@ -9,10 +9,12 @@ Backlog:
 * Jag vill ha ett suddgummi
 * Man ska kunna välja tools på samma sätt som färger, och kunna se vilken som är vald
 * Alla useractions ska inte kunna vara aktiva vid alla tillfällen. Ha internal windows där man kan koppla useractions
+* Det ska finnas ett select tool där man kan markera pixlar och sedan dra dem dit man vill ha dem. Det ska vara som en fyrkant
 
 Current Sprint
 * Jag vill att man ska kunna spara en färg i paletten, dvs dynamiskt kunna lägga till färger och välja dem(skriva in rgb)
 * Jag vill ha ett färghjul där man kan välja färg.
+* Det ska kunna gå att se vilken färg som är vald, både som en markör vid paletten men också i ett specifikt fönster där aktuell färg visas
 
 Finished:
 * Jag vill ha en custom muspekare istället för den vanliga
@@ -22,6 +24,6 @@ Finished:
 * Få bort den globala objectet interface
 * När man sparar objektet ska man behöva skriva in namn på filen 
 * Fix a global class for the important instances(pixel_map, tool_box, etc)
-* Det ska kunna gå att se vilken färg som är vald, både som en markör vid paletten men också i ett specifikt fönster där aktuell färg visas
+
 
 Scrapyard:

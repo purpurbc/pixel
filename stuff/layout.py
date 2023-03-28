@@ -40,6 +40,7 @@ class Button:
         self.image_element = None   # TODO: implement
         
     def add_action_arguments(self,action_arguments : dict):
+        print(action_arguments)
         for key, value in action_arguments.items():
             self.action_arguments[key] = value
         
@@ -139,4 +140,25 @@ class InternalWindow:
         else:
             self.window_structure.line_color = h.WHITE
 
-
+class Slider:
+    def __init__(self, structure : Structure, value_range = [0,10], increment = 1.0):
+        self.structure = structure
+        self.button = None
+        self.add_slider_button()
+        self.value_range = value_range
+        self.increment = increment
+        
+    def add_slider_button(self):
+        btn_coords = h.get_global_coords(self.structure.rect,[0,0])
+        btn_structure = Structure(pg.Rect(btn_coords[0],btn_coords[1],10,10))
+        btn_structure.color = h.red
+        btn = Button(btn_structure)
+        #button1.action = MethodType(lo.change_pen_color,button1)
+        #button1.add_action_arguments({'tool_box' : Interface.tool_box, 'color': h.WHITE})
+        self.button = btn
+        
+        
+    def move_slider(self,mouse_pos):
+        print("moving_slider")
+        print(mouse_pos)
+        self.button.structure.rect[0] = min(max(mouse_pos[0],self.value_range[0]),self.value_range[1])
