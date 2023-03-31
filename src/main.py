@@ -1,4 +1,4 @@
-from stuff import execute as ex
+import execute as ex
 import pygame as pg
 import sys
 

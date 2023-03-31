@@ -1,5 +1,5 @@
 import pygame as pg
-from stuff import helpers as h
+import helpers as h
 
 
 # TODO: Move these functions to a proper class/file

@@ -1,6 +1,6 @@
 import collections
-from stuff import helpers as h
-from stuff import layout as lo
+import helpers as h
+import layout as lo
 import pygame as pg
 
 # TODO: find a place for this class

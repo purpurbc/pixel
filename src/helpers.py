@@ -21,17 +21,11 @@ red = (220,20,20,255)
 light_red = (220,100,100,255)
 yellow = (255,223,6,255)
 
-"""# optional text
-font = pg.font.Font("freesansbold.ttf", 32) 
-infotext = font.render("TEXT", True, black)
-infotext_rect = infotext.get_rect()  
-infotext_rect.center = (s_W // 2 , 100)"""
-
 clock = pg.time.Clock()
 fps = 60. # not really fps
 
 # load background image
-cursor_image = pg.image.load("pics/cursor_pixel_v1.png")
+cursor_image = pg.image.load("images/cursor_pixel_v1.png")
 
 def get_global_coords(rect, local_coords):
     """Get the global coords from local coords inside of rect"""

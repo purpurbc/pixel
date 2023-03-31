@@ -1,18 +1,18 @@
 import pygame as pg
-from stuff import helpers as h
-from stuff import pixel_map as pm
-from stuff import render as rd
-from stuff import layout as lo
-from stuff import tools as tl
-from stuff import saver as sv
-from stuff import interface as interf_
+import helpers as h
+import pixel_map as pm
+import render as rd
+import layout as lo
+import tools as tl
+import saver as sv
+import interface as interf_
 from types import MethodType
 import copy
 from PIL import Image
 from configparser import ConfigParser
 import tomli
 
-with open("palettes.toml", mode="rb") as fp:
+with open("config/palettes.toml", mode="rb") as fp:
     palettes = tomli.load(fp)
 for key, value in palettes['DEFAULT_PALETTE'].items():
         palettes['DEFAULT_PALETTE'][key] = tuple(value)

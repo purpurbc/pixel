@@ -1,8 +1,8 @@
 import pygame as pg
 import copy as copy
-from stuff import pixel_map as pm
-from stuff import helpers as h
-from stuff import layout as lo
+import pixel_map as pm
+import helpers as h
+import layout as lo
 
 
 def draw_cell_side(game_display, start_pos, direction, pixel_size, line_color, line_width):

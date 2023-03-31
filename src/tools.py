@@ -1,6 +1,6 @@
 import pygame as pg
-from stuff import helpers as h
-from stuff import pixel_map as pm
+import helpers as h
+import pixel_map as pm
 
 class Pen:
     def __init__(self, design = [[1]], design_center = [0,0], color = h.black):

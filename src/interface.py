@@ -1,8 +1,8 @@
-from stuff import helpers as h
-from stuff import pixel_map as pm
-from stuff import tools as tl
-from stuff import saver as sv
-from stuff import layout as lo
+import helpers as h
+import pixel_map as pm
+import tools as tl
+import saver as sv
+import layout as lo
 import pygame as pg
 
 # TODO: come up with a better name

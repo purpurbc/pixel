@@ -1,6 +1,6 @@
-from stuff import helpers as h
-from stuff import pixel_map as pm
-from stuff import tools as tl
+import helpers as h
+import pixel_map as pm
+import tools as tl
 from PIL import Image
 import pygame as pg
 
