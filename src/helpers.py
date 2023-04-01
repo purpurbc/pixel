@@ -33,3 +33,9 @@ def get_global_coords(rect, local_coords):
     y = rect.y + local_coords[1]
     return [x,y]
 
+def get_local_coords(rect, global_coords):
+    """Get the local coords from global coords inside of rect"""
+    x = global_coords[0] - rect.x
+    y = global_coords[1] - rect.y
+    return [x,y]
+

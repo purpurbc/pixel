@@ -91,7 +91,7 @@ def create_palette_container( palette : pm.Palette, structure : lo.Structure, to
     for paint_name, paint_color in palette.colors.items():
         paint_btn = lo.Button(lo.Structure(pg.Rect(paint_pos[0], paint_pos[1], paint_size[0], paint_size[1]), paint_color), paint_color, h.WHITE)
         paint_btn.action = MethodType(lo.change_pen_color, paint_btn)
-        paint_btn.add_action_arguments({'tool_box' : tool_box, 'color': paint_color})
+        paint_btn.set_action_arguments({'tool_box' : tool_box, 'color': paint_color})
         paints.append(paint_btn)
         column += 1
         if column >= num_columns:
@@ -100,68 +100,71 @@ def create_palette_container( palette : pm.Palette, structure : lo.Structure, to
             column = 0
         else:
             paint_pos[0] = paint_pos[0] + (paint_size[0] + margin)
-    palette_container = lo.Container(structure,paints)
+    palette_container = lo.Container(structure,buttons=paints)
     return palette_container
 
+# TODO: find a place for this 
+# FIXME: OPTIMIZE!!!
+def create_rgb_picker_container( structure : lo.Structure):
+    sliders = []
+    colors = [(255,0,0),(0,255,0),(0,0,255)]
+    
+    for c in range(0,3):
+        slider_structure = lo.Structure(pg.Rect(10,10+c*12,100,10))
+        slider = lo.Slider(slider_structure,value_range=[0,255])
+        slider.button.action = slider.move_slider
+        slider.button.action_mode = 'was_pressed'
+        slider.button.structure.color = colors[c]
+        slider.button.hovered_color = colors[c]
+        slider.button.set_action_arguments({'cur_mouse_pos' : [-1,-1], 'prev_mouse_pos' : [-1,-1]})
+        sliders.append(slider)
+    slider_container = lo.Container(structure)
+    for slr in sliders:
+        slider_container.sliders.append(slr)
+        
+    slider_container.structure.color = h.black
+    return slider_container
+        
+    
 
 def run_application():
     """The game loop"""
+    
+    left_mouse_btn_pressed = False
+    running = True
 
+    # Create the interface
+    # TODO: separate the init function into two
     Interface = init() 
 
     # Create the game display
     game_display = pg.display.set_mode(h.s_dimension) 
 
-    left_mouse_btn_pressed = False
-    running = True
-
+    # CUSTOM CURSOR
     h.cursor_image = pg.transform.scale(h.cursor_image, (20, 20))
     cursor_img_rect = h.cursor_image.get_rect()
-    
-    # TEST PALETTE
-    side = 20
-    """button1 = lo.Button(lo.Structure(pg.Rect(4,4,side,side),h.WHITE),h.WHITE,h.WHITE)
-    button1.action = MethodType(lo.change_pen_color,button1)
-    button1.add_action_arguments({'tool_box' : Interface.tool_box, 'color': h.WHITE})
-    
-    button2 = lo.Button(lo.Structure(pg.Rect(8+side,4,side,side),h.black),h.black,h.WHITE)
-    button2.action = MethodType(lo.change_pen_color,button2)
-    button2.add_action_arguments({'tool_box' : Interface.tool_box, 'color': h.black})
-    
-    button3 = lo.Button(lo.Structure(pg.Rect(12+2*side,4,side,side),h.blue),h.blue,h.WHITE)
-    button3.action = MethodType(lo.change_pen_color,button3)
-    button3.add_action_arguments({'tool_box' : Interface.tool_box, 'color': h.blue})
-    
-    button4 = lo.Button(lo.Structure(pg.Rect(16+3*side,4,side,side),h.red),h.red,h.WHITE)
-    button4.action = MethodType(lo.change_pen_color,button4)
-    button4.add_action_arguments({'tool_box' : Interface.tool_box, 'color': h.red})"""
-    
-    #buttons = [button1, button2, button3, button4]
-    #btn_container = lo.Container(lo.Structure(pg.Rect(50,50,100,500)),buttons)
-
-
-    palette = pm.Palette('default',palettes['DEFAULT_PALETTE'])
-    btn_container = create_palette_container(palette, lo.Structure(pg.Rect(50,50,100,500)), Interface.tool_box)
-
 
     # SAVE_AS AND QUIT BUTTONS
+    side = 20
     button_c = lo.Button(lo.Structure(pg.Rect(h.s_W-side-20,5,side + 15,side),h.red),h.light_red,h.WHITE)
     button_c.action = MethodType(lo.close_window,button_c)
     
     button_s = lo.Button(lo.Structure(pg.Rect(h.s_W-side- 40 - side,5,side + 15,side),h.blue),h.light_blue,h.WHITE)
     button_s.action = Interface.set_active_internal_window
-    button_s.add_action_arguments({'window_name' : 'save_as_filename', 'active' : True})
+    button_s.set_action_arguments({'window_name' : 'save_as_filename', 'active' : True})
+
+    # TEST PALETTE
+    palette = pm.Palette('default',palettes['DEFAULT_PALETTE'])
+    btn_container = create_palette_container(palette, lo.Structure(pg.Rect(15,200,220,250)), Interface.tool_box)
 
     # TEST INPUT
-    # FIXME:
     user_input = ''
     base_font = pg.font.Font(None, 20)
     input_rect = Interface.internal_windows['save_as_filename'].window_structure.rect
     
-    slider_structure = lo.Structure(pg.Rect(10,10,100,10))
-    slider = lo.Slider(slider_structure)
-    slider.button.action = slider.move_slider
-    slider.button.add_action_arguments({'mouse_pos' : Interface.mouse_pos})
+    # TEST SLIDER
+    slider_structure = lo.Structure(pg.Rect(10,10,100,34))
+    slider_container = create_rgb_picker_container(slider_structure)
     
     while running:
         
@@ -188,7 +191,7 @@ def run_application():
                 Interface.tool_box.get_active_tool().fill_pixels(Interface.pixel_map, mouse_pos)
 
                 # Handle button presses if there are any
-                buttons_pressed(btn_container.objects,mouse_pos,left_mouse_btn_pressed) 
+                buttons_pressed(btn_container.buttons,mouse_pos,left_mouse_btn_pressed) 
                 
                 # TODO: fix this
                 if button_c.on_pressed(mouse_pos,left_mouse_btn_pressed):
@@ -197,8 +200,13 @@ def run_application():
                 if button_s.on_pressed(mouse_pos,left_mouse_btn_pressed):
                     pass
                 
-                if slider.button.on_pressed(mouse_pos,left_mouse_btn_pressed):
-                    pass
+                for slider in slider_container.sliders:
+                    prev_btn_state = slider.button.was_pressed['state']
+                    if slider.button.on_pressed(mouse_pos,left_mouse_btn_pressed) or slider.button.was_pressed['state']:
+                        if not prev_btn_state and slider.button.was_pressed['state']:
+                            slider.button.set_action_arguments({'prev_mouse_pos' : Interface.mouse_pos})
+                        slider.button.set_action_arguments({'cur_mouse_pos' : Interface.mouse_pos})
+                        pass
 
                 # FIXME: 
                 active_window = Interface.get_active_internal_window()
@@ -213,7 +221,7 @@ def run_application():
                 left_mouse_btn_pressed = False
                 
                 # Handle button clicks if there are any
-                buttons_clicked(btn_container.objects,mouse_pos,left_mouse_btn_pressed)
+                buttons_clicked(btn_container.buttons,mouse_pos,left_mouse_btn_pressed)
                 
                 # TODO: fix this
                 if button_c.on_clicked(mouse_pos,left_mouse_btn_pressed):
@@ -223,8 +231,11 @@ def run_application():
                     user_input = Interface.saver.file_name
                     pass
                 
-                if slider.button.on_clicked(mouse_pos,left_mouse_btn_pressed):
-                    pass
+                for slider in slider_container.sliders:
+                    if slider.button.on_clicked(mouse_pos,left_mouse_btn_pressed):
+                        pass
+                    elif slider.button.was_pressed['state']:
+                        slider.button.set_pressed(False,mouse_pos)
 
             # If a key is pressed
             if event.type == pg.KEYDOWN:
@@ -261,9 +272,7 @@ def run_application():
                     Interface.saver.save_as_png(Interface.pixel_map)
                     Interface.set_active_internal_window('save_as_filename',False)
                     user_input = ''
-                       
-
-                
+                            
         # Blit the pixelmap                
         rd.blit_pixelmap(game_display, Interface.pixel_map)
         
@@ -276,12 +285,12 @@ def run_application():
         rd.draw_container(game_display, btn_container)
         
         # Draw all the buttons
-        rd.draw_buttons(game_display, btn_container.objects, mouse_pos, left_mouse_btn_pressed)
+        rd.draw_buttons(game_display, btn_container.buttons, mouse_pos, left_mouse_btn_pressed)
         # Handle button hovers if there are any
         #buttons_hovered(buttons,mouse_pos,left_mouse_btn_pressed)
         
         # FIXME
-        for btn in btn_container.objects:
+        for btn in btn_container.buttons:
             try: 
                 if Interface.tool_box.get_active_tool().color == btn.action_arguments['color']:
                     rd.draw_cell(game_display, btn.structure.rect, h.yellow, 2)
@@ -295,7 +304,19 @@ def run_application():
         # Draw the internal windows
         rd.draw_internal_windows(game_display,Interface.internal_windows)
 
-        rd.draw_slider(game_display,slider, mouse_pos, left_mouse_btn_pressed)
+        # TESTING SLIDER
+        rd.draw_container(game_display,slider_container)
+        for i, slr in enumerate(slider_container.sliders):
+            rd.draw_slider(game_display, slr, mouse_pos, left_mouse_btn_pressed)
+            val = int(slr.get_value())
+            if val:
+                tool_color = Interface.tool_box.get_active_tool().color
+                if i == 0:
+                    Interface.tool_box.get_active_tool().color = (val,tool_color[1],tool_color[2])
+                elif i == 1:
+                    Interface.tool_box.get_active_tool().color = (tool_color[0],val,tool_color[2])
+                elif i == 2:
+                    Interface.tool_box.get_active_tool().color = (tool_color[0],tool_color[1],val)
         
         # FIXME:
         active_window = Interface.get_active_internal_window()
