@@ -5,6 +5,7 @@ import render as rd
 import layout as lo
 import tools as tl
 import saver as sv
+import IO as io
 import interface as interf_
 from types import MethodType
 import copy
@@ -12,15 +13,16 @@ from PIL import Image
 from configparser import ConfigParser
 import tomli
 
-with open("config/palettes.toml", mode="rb") as fp:
-    palettes = tomli.load(fp)
-for key, value in palettes['DEFAULT_PALETTE'].items():
-        palettes['DEFAULT_PALETTE'][key] = tuple(value)
+def load_palettes():
+    with open("config/palettes.toml", mode="rb") as fp:
+        palettes = tomli.load(fp)
 
+    for key, value in palettes['DEFAULT_PALETTE'].items():
+            palettes['DEFAULT_PALETTE'][key] = tuple(value)
+    
+    return palettes
 
-def init():
-    """Initialize everything that is needed"""
-
+def init_pygame_essentials():
     # Initialize pygame
     pg.init()
 
@@ -30,52 +32,17 @@ def init():
     #h.infotext_rect = h.infotext.get_rect()  
     #h.infotext_rect.center = (h.s_W // 2 , h.s_H - 30)
 
-    # Set the visibility of the default cursor to false
-    pg.mouse.set_visible(False)
-
     # Set the caption of the display
     pg.display.set_caption("pxls")
-    
-    # Create the pixelmap
-    x = 10
-    s = 500
-    pixel_map = pm.PixelMap((int(s/x),int(s/x)), lo.Structure(pg.Rect(250,50,s,s),h.grey,h.dark_grey,3))
 
-    pen = tl.Pen()
-    pen_plus = tl.Pen([[0,1,0],[1,1,1],[0,1,0]],[1,1])
-    tool_box = tl.ToolBox()
-    tool_box.add_tool('pen',pen)
-    tool_box.add_tool('pen_plus',pen_plus)
-    tool_box.set_active_tool('pen')
-    
-    saver = sv.Saver()
-    
-    internal_window = lo.InternalWindow(lo.Structure(pg.Rect(h.s_W - 235, 5,150,20),line_width=2),name='save_as_filename')
+def set_custom_cursor(image, size):
+    # Set the visibility of the default cursor to false
+    pg.mouse.set_visible(False) 
 
-    Interface = interf_.Interface()
-    Interface.add_pixelmap(pixel_map)
-    Interface.add_toolbox(tool_box)
-    Interface.add_saver(saver)
-    Interface.add_internal_window(internal_window)
+    image_transformed = pg.transform.scale(image, size)
 
-    return Interface
-
-
-def buttons_pressed(buttons : list, mouse_pos, left_mouse_btn_pressed):
-    for btn in buttons:
-        if btn.on_pressed(mouse_pos,left_mouse_btn_pressed):
-            pass
-
-def buttons_clicked(buttons : list, mouse_pos, left_mouse_btn_pressed):
-    for btn in buttons:
-        if btn.on_clicked(mouse_pos,left_mouse_btn_pressed):
-            pass
-        
-def buttons_hovered(buttons : list, mouse_pos, left_mouse_btn_pressed):
-    for btn in buttons:
-        if btn.on_hovered(mouse_pos,left_mouse_btn_pressed):
-            pass
-
+    # Return the image of the cursor for blitting
+    return image_transformed
 
 # TODO: find a place for this 
 # FIXME: OPTIMIZE!!!
@@ -129,20 +96,42 @@ def create_rgb_picker_container( structure : lo.Structure):
 
 def run_application():
     """The game loop"""
-    
-    left_mouse_btn_pressed = False
-    running = True
+
+    #////////////////////-- Intial Setup --/////////////////////
+
+    # initialize the pygame essentials
+    init_pygame_essentials()
+
+    # Create a toolbox
+    toolbox = tl.ToolBox()
+
+    # Create a pixelmap
+    w_h = 500           #width and height
+    r_c = 20            #rows and columns
+    pix_dim = (int(w_h/r_c),int(w_h/r_c))
+    pixel_map = pm.PixelMap(pix_dim, lo.Structure(pg.Rect(250,50,w_h,w_h),h.grey,h.dark_grey,3))
+
+    # Create a saving unit
+    saver = sv.Saver()
+
+    # Create an internal window
+    internal_window = lo.InternalWindow(lo.Structure(pg.Rect(h.s_W - 235, 5,150,20),line_width=2),name='save_as_filename')
 
     # Create the interface
-    # TODO: separate the init function into two
-    Interface = init() 
+    Interface = interf_.Interface(pixel_map=pixel_map, 
+                                  toolbox=toolbox, 
+                                  saver=saver,
+                                  internal_window=internal_window) 
 
     # Create the game display
     game_display = pg.display.set_mode(h.s_dimension) 
 
-    # CUSTOM CURSOR
-    h.cursor_image = pg.transform.scale(h.cursor_image, (20, 20))
-    cursor_img_rect = h.cursor_image.get_rect()
+    IO_handler = io.IO_handler()
+
+
+    #////////////////////-- Buttons/Sliders/Cursor --/////////////////////
+
+    cursor_image = set_custom_cursor(h.cursor_image, (20,20))
 
     # SAVE_AS AND QUIT BUTTONS
     side = 20
@@ -153,9 +142,10 @@ def run_application():
     button_s.action = Interface.set_active_internal_window
     button_s.set_action_arguments({'window_name' : 'save_as_filename', 'active' : True})
 
-    # TEST PALETTE
-    palette = pm.Palette('default',palettes['DEFAULT_PALETTE'])
-    btn_container = create_palette_container(palette, lo.Structure(pg.Rect(15,200,220,250)), Interface.tool_box)
+    # DEFAULT PALETTE
+    palettes = load_palettes()
+    default_palette = pm.Palette('default',palettes['DEFAULT_PALETTE'])
+    palette_container = create_palette_container(default_palette, lo.Structure(pg.Rect(15,200,220,250)), Interface.toolbox)
 
     # TEST INPUT
     user_input = ''
@@ -165,159 +155,87 @@ def run_application():
     # TEST SLIDER
     slider_structure = lo.Structure(pg.Rect(10,10,100,34))
     slider_container = create_rgb_picker_container(slider_structure)
-    
-    while running:
+
+
+    #////////////////////-- Application Loop --/////////////////////
+
+    left_mouse_btn_pressed = [False]
+    running = [True]
+
+    while running[0]:
         
         # Continously update the mouse position
         mouse_pos = pg.mouse.get_pos()
         Interface.set_mouse_pos(mouse_pos)
-    
-        # Handle events/input from the user
-        for event in pg.event.get(): 
-            
-            # If the event is a quit event. Close program
-            if event.type == pg.QUIT: 
-                running = False
-                
-            """if event.type == lo.CHANGE_PEN_COLOR:
-                pass"""
 
-            # If the left mouse button is pressed
-            if (event.type == pg.MOUSEBUTTONDOWN and event.button == 1) or left_mouse_btn_pressed:
-                
-                left_mouse_btn_pressed = True
-                
-                # Fill the pixel, if one is pressed
-                Interface.tool_box.get_active_tool().fill_pixels(Interface.pixel_map, mouse_pos)
+        #////////////////////-- Event Handling --/////////////////////
 
-                # Handle button presses if there are any
-                buttons_pressed(btn_container.buttons,mouse_pos,left_mouse_btn_pressed) 
-                
-                # TODO: fix this
-                if button_c.on_pressed(mouse_pos,left_mouse_btn_pressed):
-                    pass
-                
-                if button_s.on_pressed(mouse_pos,left_mouse_btn_pressed):
-                    pass
-                
-                for slider in slider_container.sliders:
-                    prev_btn_state = slider.button.was_pressed['state']
-                    if slider.button.on_pressed(mouse_pos,left_mouse_btn_pressed) or slider.button.was_pressed['state']:
-                        if not prev_btn_state and slider.button.was_pressed['state']:
-                            slider.button.set_action_arguments({'prev_mouse_pos' : Interface.mouse_pos})
-                        slider.button.set_action_arguments({'cur_mouse_pos' : Interface.mouse_pos})
-                        pass
+        user_input = IO_handler.handle_event(Interface, 
+                                            button_s, 
+                                            button_c, 
+                                            palette_container, 
+                                            slider_container, 
+                                            user_input,
+                                            running, 
+                                            left_mouse_btn_pressed)
 
-                # FIXME: 
-                active_window = Interface.get_active_internal_window()
-                if active_window:
-                    active_window_pressed = Interface.on_active_window_pressed(mouse_pos, left_mouse_btn_pressed)
-                    if active_window_pressed and active_window.name == 'save_as_filename':
-                        user_input = ''
-            
-            # If the left mouse button is released
-            if event.type == pg.MOUSEBUTTONUP and event.button == 1:
-                
-                left_mouse_btn_pressed = False
-                
-                # Handle button clicks if there are any
-                buttons_clicked(btn_container.buttons,mouse_pos,left_mouse_btn_pressed)
-                
-                # TODO: fix this
-                if button_c.on_clicked(mouse_pos,left_mouse_btn_pressed):
-                    pass
-                
-                if button_s.on_clicked(mouse_pos,left_mouse_btn_pressed):
-                    user_input = Interface.saver.file_name
-                    pass
-                
-                for slider in slider_container.sliders:
-                    if slider.button.on_clicked(mouse_pos,left_mouse_btn_pressed):
-                        pass
-                    elif slider.button.was_pressed['state']:
-                        slider.button.set_pressed(False,mouse_pos)
 
-            # If a key is pressed
-            if event.type == pg.KEYDOWN:
-                
-                # FIXME:
-                for internal_window_name, internal_window in Interface.internal_windows.items():
-                    if internal_window.active and event.key != pg.K_BACKSPACE and event.key != pg.K_RETURN:
-                        user_input += event.unicode
-                    elif internal_window.active and event.key == pg.K_BACKSPACE:
-                        user_input = user_input[:-1]
+        #////////////////////-- Render/Blit to Screen --/////////////////////
 
-                # If the pressed key is DELETE
-                if event.key == pg.K_DELETE:
-                    # Clear the pixel_map
-                    rd.clear_pixelmap(Interface.pixel_map)
-                
-                # If the pressed key is B
-                if event.key == pg.K_b:
-                    # Clear the pixel_map
-                    if Interface.tool_box.active_tool == 'pen':
-                        Interface.tool_box.set_active_tool('pen_plus')
-                    else:
-                        Interface.tool_box.set_active_tool('pen')
-                    
-                # If the pressed key is S
-                if event.key == pg.K_s: 
-                    # Save image as png
-                    #Interface.saver.save_as_png(Interface.pixel_map)
-                    pass
-
-                # If the pressed key is ENTER
-                if event.key == pg.K_RETURN and Interface.internal_windows['save_as_filename'].active: 
-                    Interface.saver.set_filename(user_input)
-                    Interface.saver.save_as_png(Interface.pixel_map)
-                    Interface.set_active_internal_window('save_as_filename',False)
-                    user_input = ''
-                            
+        # ESSENTIAL                    
         # Blit the pixelmap                
         rd.blit_pixelmap(game_display, Interface.pixel_map)
         
+        # ESSENTIAL
         # Blit a cell around the hovered pixel to highlight it
         hovered_pixel = Interface.pixel_map.get_pixel(mouse_pos)
         if hovered_pixel:
             rd.draw_cell(game_display, hovered_pixel.rect, Interface.pixel_map.structure.line_color, 2)
         
+        # ESSENTIAL 
+        # TODO: make it prettier
         # Draw the container
-        rd.draw_container(game_display, btn_container)
+        rd.draw_container(game_display, palette_container)
         
         # Draw all the buttons
-        rd.draw_buttons(game_display, btn_container.buttons, mouse_pos, left_mouse_btn_pressed)
+        rd.draw_buttons(game_display, palette_container.buttons, mouse_pos, left_mouse_btn_pressed[0])
         # Handle button hovers if there are any
         #buttons_hovered(buttons,mouse_pos,left_mouse_btn_pressed)
         
+        # ESSENTIAL
         # FIXME
-        for btn in btn_container.buttons:
+        for btn in palette_container.buttons:
             try: 
-                if Interface.tool_box.get_active_tool().color == btn.action_arguments['color']:
+                if Interface.toolbox.get_active_tool().color == btn.action_arguments['color']:
                     rd.draw_cell(game_display, btn.structure.rect, h.yellow, 2)
             except KeyError:
                 pass
 
+        # ESSENTIAL
         # TODO: fix this
-        rd.draw_button(game_display, button_c, mouse_pos, left_mouse_btn_pressed)
-        rd.draw_button(game_display, button_s, mouse_pos, left_mouse_btn_pressed)
+        rd.draw_button(game_display, button_c, mouse_pos, left_mouse_btn_pressed[0])
+        rd.draw_button(game_display, button_s, mouse_pos, left_mouse_btn_pressed[0])
         
+        # ESSENTIAL
         # Draw the internal windows
         rd.draw_internal_windows(game_display,Interface.internal_windows)
 
+        # ESSENTIAL
         # TESTING SLIDER
-        rd.draw_container(game_display,slider_container)
+        rd.draw_container(game_display, slider_container)
         for i, slr in enumerate(slider_container.sliders):
-            rd.draw_slider(game_display, slr, mouse_pos, left_mouse_btn_pressed)
+            rd.draw_slider(game_display, slr, mouse_pos, left_mouse_btn_pressed[0])
             val = int(slr.get_value())
             if val:
-                tool_color = Interface.tool_box.get_active_tool().color
+                tool_color = Interface.toolbox.get_active_tool().color
                 if i == 0:
-                    Interface.tool_box.get_active_tool().color = (val,tool_color[1],tool_color[2])
+                    Interface.toolbox.get_active_tool().color = (val,tool_color[1],tool_color[2])
                 elif i == 1:
-                    Interface.tool_box.get_active_tool().color = (tool_color[0],val,tool_color[2])
+                    Interface.toolbox.get_active_tool().color = (tool_color[0],val,tool_color[2])
                 elif i == 2:
-                    Interface.tool_box.get_active_tool().color = (tool_color[0],tool_color[1],val)
+                    Interface.toolbox.get_active_tool().color = (tool_color[0],tool_color[1],val)
         
+        # ESSENTIAL
         # FIXME:
         active_window = Interface.get_active_internal_window()
         if active_window:
@@ -325,11 +243,13 @@ def run_application():
                 text_surface = base_font.render(user_input, True, (255, 255, 255))
                 game_display.blit(text_surface, (input_rect.x+5, input_rect.y+5))
         
-        
+        # ESSENTIAL
         # Blit the custom cursor
-        cursor_img_rect.center = pg.mouse.get_pos()  # update position 
-        game_display.blit(h.cursor_image,(cursor_img_rect.x,cursor_img_rect.y) ) # draw the cursor
+        cursor_image_rect = cursor_image.get_rect()
+        cursor_image_rect.center = mouse_pos  # update position 
+        game_display.blit(cursor_image,(cursor_image_rect.x,cursor_image_rect.y) ) # draw the cursor
 
+        # ESSENTIAL
         # Update the window
         #pg.display.update()
         pg.display.flip()

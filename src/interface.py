@@ -4,18 +4,26 @@ import tools as tl
 import saver as sv
 import layout as lo
 import pygame as pg
+import IO as io
 
 # TODO: come up with a better name
 class Interface:
-    def __init__(self, pixel_map : pm.PixelMap=None, tool_box : tl.ToolBox=None, saver : sv.Saver=None):
+    def __init__(self, 
+                 pixel_map : pm.PixelMap=None, 
+                 toolbox : tl.ToolBox=None, 
+                 saver : sv.Saver=None, 
+                 internal_window : lo.InternalWindow=None):
+        
         self.pixel_map = pixel_map
-        self.tool_box = tool_box
+        self.toolbox = toolbox
         self.saver = saver
         self.internal_windows = dict()
+
+        self.add_internal_window(internal_window)
         self.mouse_pos = [-1,-1]
       
-    def add_toolbox(self, tool_box : tl.ToolBox):
-        self.tool_box = tool_box
+    def add_toolbox(self, toolbox : tl.ToolBox):
+        self.toolbox = toolbox
         
     def add_pixelmap(self, pixel_map : pm.PixelMap):
         self.pixel_map = pixel_map

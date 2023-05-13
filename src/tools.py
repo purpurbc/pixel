@@ -25,18 +25,25 @@ class Pen:
         if pressed_pixel:
             pressed_pixel.previous_color = pressed_pixel.color
             pressed_pixel.color = self.color
-            
+
+       
 class ToolBox:
-    def __init__(self, tools : dict={}, active_tool=None):
-        self.tools = tools
+    def __init__(self, custom_tools : dict=dict(), active_tool='pen'):
+        self.custom_tools = custom_tools
+        self.default_tools = {'pen':Pen(),'pen_plus':Pen([[0,1,0],[1,1,1],[0,1,0]],[1,1])}
         self.active_tool = active_tool
        
-    def add_tool(self, tool_name : str, tool):
-        self.tools[tool_name] = tool
+    def add_custom_tool(self, tool_name : str, tool):
+        self.custom_tools[tool_name] = tool
          
     def set_active_tool(self, tool_name):
         self.active_tool = tool_name
         
     def get_active_tool(self):
-        return self.tools[self.active_tool]
+        if self.active_tool in self.default_tools.keys():
+            return self.default_tools[self.active_tool]
+        
+        elif self.active_tool in self.custom_tools.keys():
+            return self.custom_tools[self.active_tool]
+
     

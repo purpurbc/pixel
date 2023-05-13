@@ -13,6 +13,9 @@ def change_pen_color(self, tool_box, color):
 def save_as(self, saver, pixel_map, internal_window):
     pass
 
+
+
+
 class Structure:
     def __init__(self, rect, color = h.grey_2, line_color = h.black, line_width = 3):
         self.rect = rect
@@ -138,7 +141,7 @@ class Slider:
         if val != self.value:
             self.value = val
             return self.value
-        return None
+        return val
         
 
 
@@ -173,6 +176,21 @@ class Container:
         global_coords = h.get_global_coords(self.structure.rect, local_coords)
         slider.structure.rect.x, slider.structure.rect.y = global_coords[0], global_coords[1]
         self.sliders.append(slider)
+
+    def buttons_pressed(self, mouse_pos, left_mouse_btn_pressed):
+        for btn in self.buttons:
+            if btn.on_pressed(mouse_pos, left_mouse_btn_pressed):
+                pass
+
+    def buttons_clicked(self, mouse_pos, left_mouse_btn_pressed):
+        for btn in self.buttons:
+            if btn.on_clicked(mouse_pos, left_mouse_btn_pressed):
+                pass
+            
+    def buttons_hovered(self, mouse_pos, left_mouse_btn_pressed):
+        for btn in self.buttons:
+            if btn.on_hovered(mouse_pos, left_mouse_btn_pressed):
+                pass
         
 
 class TextArea:
