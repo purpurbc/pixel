@@ -8,6 +8,13 @@ class Palette:
     def __init__(self, name : str, colors : dict): 
         self.name = name
         self.colors = colors # -> {'color_name' : RGBA-tuple, 'color_name_2' : RGBA-tuple ... }
+    
+    def create_palette_container(self, structure : lo.Structure, paint_buttons : lo.Button):
+    
+        # Create a palette container with all the created buttons
+        palette_container = lo.Container(structure, buttons=paint_buttons)
+        
+        return palette_container
 
 class Pixel:
     def __init__(self, rect, color=None):

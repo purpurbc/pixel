@@ -18,6 +18,7 @@ class Interface:
         self.toolbox = toolbox
         self.saver = saver
         self.internal_windows = dict()
+        self.running = True
 
         self.add_internal_window(internal_window)
         self.mouse_pos = [-1,-1]

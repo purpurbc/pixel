@@ -6,8 +6,10 @@ import pygame as pg
 import render as rd
 
 class IO_handler:
-    def __init__(self,event=None):
-        self.event = event
+    def __init__(self):
+        self.event = None
+        self.left_mouse_btn_pressed = False
+        self.saver = None
     
     def set_event(self,event):
         self.event = event
@@ -19,9 +21,7 @@ class IO_handler:
                      button_c, 
                      btn_container, 
                      slider_container, 
-                     user_input,
-                     running, 
-                     left_mouse_btn_pressed):
+                     user_input):
         
 
         # Handle events/input from the user
@@ -30,32 +30,29 @@ class IO_handler:
 
              # If the event is a quit event. Close program
             if event.type == pg.QUIT: 
-                running[0] = False
+                Interface.running = False
                 
             """if event.type == lo.CHANGE_PEN_COLOR:
                 pass"""
 
             # If the left mouse button is pressed
-            if (event.type == pg.MOUSEBUTTONDOWN and event.button == 1) or left_mouse_btn_pressed[0]:
+            if (event.type == pg.MOUSEBUTTONDOWN and event.button == 1) or self.left_mouse_btn_pressed:
                 
-                left_mouse_btn_pressed[0] = True
+                self.left_mouse_btn_pressed = True
                 
                 # Fill the pixel, if one is pressed
                 Interface.toolbox.get_active_tool().fill_pixels(Interface.pixel_map, Interface.mouse_pos)
 
                 # Handle button presses if there are any
-                btn_container.buttons_pressed(Interface.mouse_pos, left_mouse_btn_pressed[0]) 
+                btn_container.buttons_pressed(Interface.mouse_pos, self.left_mouse_btn_pressed) 
                 
-                # TODO: fix this
-                if button_c.on_pressed(Interface.mouse_pos,left_mouse_btn_pressed[0]):
-                    pass
+                button_c.on_pressed(Interface.mouse_pos, self.left_mouse_btn_pressed)
                 
-                if button_s.on_pressed(Interface.mouse_pos,left_mouse_btn_pressed[0]):
-                    pass
-                
+                button_s.on_pressed(Interface.mouse_pos, self.left_mouse_btn_pressed)
+
                 for slider in slider_container.sliders:
                     prev_btn_state = slider.button.was_pressed['state']
-                    if slider.button.on_pressed(Interface.mouse_pos,left_mouse_btn_pressed[0]) or slider.button.was_pressed['state']:
+                    if slider.button.on_pressed(Interface.mouse_pos, self.left_mouse_btn_pressed) or slider.button.was_pressed['state']:
                         if not prev_btn_state and slider.button.was_pressed['state']:
                             slider.button.set_action_arguments({'prev_mouse_pos' : Interface.mouse_pos})
                         slider.button.set_action_arguments({'cur_mouse_pos' : Interface.mouse_pos})
@@ -64,28 +61,28 @@ class IO_handler:
                 # FIXME: 
                 active_window = Interface.get_active_internal_window()
                 if active_window:
-                    active_window_pressed = Interface.on_active_window_pressed(Interface.mouse_pos, left_mouse_btn_pressed[0])
+                    active_window_pressed = Interface.on_active_window_pressed(Interface.mouse_pos, self.left_mouse_btn_pressed)
                     if active_window_pressed and active_window.name == 'save_as_filename':
                         user_input = ''
             
             # If the left mouse button is released
             if event.type == pg.MOUSEBUTTONUP and event.button == 1:
                 
-                left_mouse_btn_pressed[0] = False
+                self.left_mouse_btn_pressed = False
                 
                 # Handle button clicks if there are any
-                btn_container.buttons_clicked(Interface.mouse_pos, left_mouse_btn_pressed[0])
+                btn_container.buttons_clicked(Interface.mouse_pos, self.left_mouse_btn_pressed)
                 
                 # TODO: fix this
-                if button_c.on_clicked(Interface.mouse_pos,left_mouse_btn_pressed[0]):
+                if button_c.on_clicked(Interface.mouse_pos, self.left_mouse_btn_pressed):
                     pass
                 
-                if button_s.on_clicked(Interface.mouse_pos,left_mouse_btn_pressed[0]):
+                if button_s.on_clicked(Interface.mouse_pos, self.left_mouse_btn_pressed):
                     user_input = Interface.saver.file_name
                     pass
                 
                 for slider in slider_container.sliders:
-                    if slider.button.on_clicked(Interface.mouse_pos,left_mouse_btn_pressed[0]):
+                    if slider.button.on_clicked(Interface.mouse_pos, self.left_mouse_btn_pressed):
                         pass
                     elif slider.button.was_pressed['state']:
                         slider.button.set_pressed(False,Interface.mouse_pos)

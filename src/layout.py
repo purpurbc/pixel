@@ -16,6 +16,7 @@ def save_as(self, saver, pixel_map, internal_window):
 
 
 
+
 class Structure:
     def __init__(self, rect, color = h.grey_2, line_color = h.black, line_width = 3):
         self.rect = rect
@@ -82,7 +83,6 @@ class Button:
                 self.action(**self.action_arguments)
             return True
         return False
-    
 
     def on_released(self,mouse_pos, left_mouse_btn_pressed):
         """Release: mouse_pos is on the buttons rect, the left_mouse_button is NOT pressed and
@@ -148,7 +148,7 @@ class Slider:
 class Container:
     def __init__(self, structure : Structure, containers : list = [], buttons : list = [], sliders : list = []):
         self.structure = structure
-
+ 
         self.containers = []
         for ctn in containers:
             self.add_container(ctn, [ctn.structure.rect.x, ctn.structure.rect.y])
@@ -192,7 +192,6 @@ class Container:
             if btn.on_hovered(mouse_pos, left_mouse_btn_pressed):
                 pass
         
-
 class TextArea:
     def __init__(self, rect):
         self.rect = rect

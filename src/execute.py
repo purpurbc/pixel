@@ -46,32 +46,6 @@ def set_custom_cursor(image, size):
 
 # TODO: find a place for this 
 # FIXME: OPTIMIZE!!!
-def create_palette_container( palette : pm.Palette, structure : lo.Structure, tool_box : tl.ToolBox):
-    paints = []
-    rect = structure.rect
-    paint_size = [20,20] #TODO add a proper define
-    margin = 2
-    num_columns = int(rect.w/(paint_size[0]+2*margin))
-    print(num_columns)
-    column = 0
-    paint_pos = [margin,margin]
-    for paint_name, paint_color in palette.colors.items():
-        paint_btn = lo.Button(lo.Structure(pg.Rect(paint_pos[0], paint_pos[1], paint_size[0], paint_size[1]), paint_color), paint_color, h.WHITE)
-        paint_btn.action = MethodType(lo.change_pen_color, paint_btn)
-        paint_btn.set_action_arguments({'tool_box' : tool_box, 'color': paint_color})
-        paints.append(paint_btn)
-        column += 1
-        if column >= num_columns:
-            paint_pos[1] = paint_pos[1] + (paint_size[1] + margin)
-            paint_pos[0] = margin
-            column = 0
-        else:
-            paint_pos[0] = paint_pos[0] + (paint_size[0] + margin)
-    palette_container = lo.Container(structure,buttons=paints)
-    return palette_container
-
-# TODO: find a place for this 
-# FIXME: OPTIMIZE!!!
 def create_rgb_picker_container( structure : lo.Structure):
     sliders = []
     colors = [(255,0,0),(0,255,0),(0,0,255)]
@@ -91,8 +65,36 @@ def create_rgb_picker_container( structure : lo.Structure):
         
     slider_container.structure.color = h.black
     return slider_container
-        
+
+# TODO: make this general, and not just for palettes 
+def create_button_grid(palette, tool_box, paint_size, max_width, margin):
     
+    paint_buttons = []                                      # List for all the paint buttons
+    paint_pos = [margin,margin]                             # Position of the current paint buttons placement
+    num_columns = int(max_width/(paint_size[0]+2*margin))   # Number of columns in the grid
+    
+    # Loop all the colors within the palette
+    for i, (_, paint_color) in enumerate(palette.colors.items()):
+        
+        # Create a button and set its approapriate action for each color
+        paint_btn = lo.Button(lo.Structure(pg.Rect(paint_pos, paint_size), paint_color), paint_color, h.WHITE)
+        paint_btn.action = MethodType(lo.change_pen_color, paint_btn)
+        paint_btn.set_action_arguments({'tool_box' : tool_box, 'color': paint_color})
+        
+        # Append the paint button to the list
+        paint_buttons.append(paint_btn)
+
+        # Update the paint button postion for the next paint button
+        # Move to the next row if the current row is full
+        if (i+1)%num_columns == 0:
+            paint_pos[0] = margin
+            paint_pos[1] = paint_pos[1] + (paint_size[1] + margin)
+            
+        else:
+            paint_pos[0] = paint_pos[0] + (paint_size[0] + margin) 
+    
+    # Return the buttons
+    return paint_buttons
 
 def run_application():
     """The game loop"""
@@ -101,7 +103,16 @@ def run_application():
 
     # initialize the pygame essentials
     init_pygame_essentials()
+    
+    # Create the game display
+    game_display = pg.display.set_mode(h.s_dimension) 
 
+    IO_handler = io.IO_handler()
+    
+    palettes = load_palettes()
+
+    #////////////////////-- Interface Setup --/////////////////////
+    
     # Create a toolbox
     toolbox = tl.ToolBox()
 
@@ -122,13 +133,7 @@ def run_application():
                                   toolbox=toolbox, 
                                   saver=saver,
                                   internal_window=internal_window) 
-
-    # Create the game display
-    game_display = pg.display.set_mode(h.s_dimension) 
-
-    IO_handler = io.IO_handler()
-
-
+    
     #////////////////////-- Buttons/Sliders/Cursor --/////////////////////
 
     cursor_image = set_custom_cursor(h.cursor_image, (20,20))
@@ -143,9 +148,10 @@ def run_application():
     button_s.set_action_arguments({'window_name' : 'save_as_filename', 'active' : True})
 
     # DEFAULT PALETTE
-    palettes = load_palettes()
-    default_palette = pm.Palette('default',palettes['DEFAULT_PALETTE'])
-    palette_container = create_palette_container(default_palette, lo.Structure(pg.Rect(15,200,220,250)), Interface.toolbox)
+    default_palette = pm.Palette('default', palettes['DEFAULT_PALETTE'])
+    palette_structure = lo.Structure(pg.Rect(15,200,220,250))
+    paint_buttons = create_button_grid(default_palette, Interface.toolbox, (20,20), palette_structure.rect.w, 2)
+    palette_container = default_palette.create_palette_container(palette_structure, paint_buttons)
 
     # TEST INPUT
     user_input = ''
@@ -156,13 +162,9 @@ def run_application():
     slider_structure = lo.Structure(pg.Rect(10,10,100,34))
     slider_container = create_rgb_picker_container(slider_structure)
 
-
     #////////////////////-- Application Loop --/////////////////////
 
-    left_mouse_btn_pressed = [False]
-    running = [True]
-
-    while running[0]:
+    while Interface.running:
         
         # Continously update the mouse position
         mouse_pos = pg.mouse.get_pos()
@@ -175,14 +177,11 @@ def run_application():
                                             button_c, 
                                             palette_container, 
                                             slider_container, 
-                                            user_input,
-                                            running, 
-                                            left_mouse_btn_pressed)
+                                            user_input)
 
 
         #////////////////////-- Render/Blit to Screen --/////////////////////
-
-        # ESSENTIAL                    
+                 
         # Blit the pixelmap                
         rd.blit_pixelmap(game_display, Interface.pixel_map)
         
@@ -198,7 +197,7 @@ def run_application():
         rd.draw_container(game_display, palette_container)
         
         # Draw all the buttons
-        rd.draw_buttons(game_display, palette_container.buttons, mouse_pos, left_mouse_btn_pressed[0])
+        rd.draw_buttons(game_display, palette_container.buttons, mouse_pos, IO_handler.left_mouse_btn_pressed)
         # Handle button hovers if there are any
         #buttons_hovered(buttons,mouse_pos,left_mouse_btn_pressed)
         
@@ -213,8 +212,8 @@ def run_application():
 
         # ESSENTIAL
         # TODO: fix this
-        rd.draw_button(game_display, button_c, mouse_pos, left_mouse_btn_pressed[0])
-        rd.draw_button(game_display, button_s, mouse_pos, left_mouse_btn_pressed[0])
+        rd.draw_button(game_display, button_c, mouse_pos, IO_handler.left_mouse_btn_pressed)
+        rd.draw_button(game_display, button_s, mouse_pos, IO_handler.left_mouse_btn_pressed)
         
         # ESSENTIAL
         # Draw the internal windows
@@ -224,7 +223,7 @@ def run_application():
         # TESTING SLIDER
         rd.draw_container(game_display, slider_container)
         for i, slr in enumerate(slider_container.sliders):
-            rd.draw_slider(game_display, slr, mouse_pos, left_mouse_btn_pressed[0])
+            rd.draw_slider(game_display, slr, mouse_pos, IO_handler.left_mouse_btn_pressed)
             val = int(slr.get_value())
             if val:
                 tool_color = Interface.toolbox.get_active_tool().color
