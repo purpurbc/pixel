@@ -8,6 +8,7 @@ __pycache__/
 
 # Portable Network Graphics
 *.png
+!images/*.png
 
 # JPEG
 *.jpg
