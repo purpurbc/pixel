@@ -1,6 +1,6 @@
 # A simple pixelart application
 
-![alt text](https://github.com/purpurbc/pixel/images/pixel.png?raw=true)
+![alt text](https://raw.githubusercontent.com/purpurbc/pixel/develop/images/pixel.png)
 
 Description:
 This is a simple WIP pixelart application. It's developed using pygame, which is far from optimal (preferably something likte SDL would have been used). The main focus of this project was not an optimized application but to structure a project and finish it within a lesser timeframe. It started as a sideproject for a bigger idea, where pixelart was needed.
