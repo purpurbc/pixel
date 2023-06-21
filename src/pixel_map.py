@@ -24,8 +24,8 @@ class Pixel:
 
 class PixelMap:
     def __init__(self, pixel_dims, structure : lo.Structure):
-        pixel_size = [structure.rect.w/pixel_dims[1], structure.rect.h/pixel_dims[0]]
-        self.pixels = [[Pixel(pg.Rect(structure.rect.x + i*pixel_size[0], structure.rect.y + j*pixel_size[1], pixel_size[0], pixel_size[1])) for i in range(pixel_dims[0])] for j in range(pixel_dims[1])]
+        p_s = [structure.rect.w/pixel_dims[1], structure.rect.h/pixel_dims[0]] #pixelsize
+        self.pixels = [[Pixel(pg.Rect(structure.rect.x + i*p_s[0], structure.rect.y + j*p_s[1], p_s[0], p_s[1])) for i in range(pixel_dims[0])] for j in range(pixel_dims[1])]
         self.pixel_dimensions = pixel_dims
         self.structure = structure
         self.grid_line_color = h.medium_grey

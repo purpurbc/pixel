@@ -14,56 +14,47 @@ from configparser import ConfigParser
 import tomli
 
 def load_palettes():
-    with open("config/palettes.toml", mode="rb") as fp:
-        palettes = tomli.load(fp)
 
-    for key, value in palettes['DEFAULT_PALETTE'].items():
-            palettes['DEFAULT_PALETTE'][key] = tuple(value)
+    # Open the toml file with the palettes and load the data
+    try: 
+        with open("config/palettes.toml", mode="rb") as fp:
+            palettes = tomli.load(fp)
+    except OSError:
+        raise OSError("Cannot open config/palettes.toml")
     
     return palettes
 
 def init_pygame_essentials():
+
     # Initialize pygame
     pg.init()
-
-    # Initialize info text for displaying active operator
-    #h.font = pg.font.Font("freesansbold.ttf", 20) 
-    #h.infotext = h.font.render("c: ERASE", True, h.black)
-    #h.infotext_rect = h.infotext.get_rect()  
-    #h.infotext_rect.center = (h.s_W // 2 , h.s_H - 30)
 
     # Set the caption of the display
     pg.display.set_caption("pxls")
 
 def set_custom_cursor(image, size):
+
     # Set the visibility of the default cursor to false
     pg.mouse.set_visible(False) 
 
+    # Transform the image to a set size
     image_transformed = pg.transform.scale(image, size)
 
-    # Return the image of the cursor for blitting
     return image_transformed
 
 # TODO: find a place for this 
-# FIXME: OPTIMIZE!!!
 def create_rgb_picker_container( structure : lo.Structure):
-    sliders = []
-    colors = [(255,0,0),(0,255,0),(0,0,255)]
-    
-    for c in range(0,3):
-        slider_structure = lo.Structure(pg.Rect(10,10+c*12,100,10))
-        slider = lo.Slider(slider_structure,value_range=[0,255])
-        slider.button.action = slider.move_slider
-        slider.button.action_mode = 'was_pressed'
-        slider.button.structure.color = colors[c]
-        slider.button.hovered_color = colors[c]
-        slider.button.set_action_arguments({'cur_mouse_pos' : [-1,-1], 'prev_mouse_pos' : [-1,-1]})
-        sliders.append(slider)
+
+    # Create a slider container
     slider_container = lo.Container(structure)
-    for slr in sliders:
-        slider_container.sliders.append(slr)
-        
     slider_container.structure.color = h.black
+    
+    # Create all of the sliders and add them to the container
+    for i in range(0,3):
+        slider_structure = lo.Structure(pg.Rect(10,10+i*12,100,10))
+        slider = lo.Slider(slider_structure,value_range=[0,255])
+        slider_container.sliders.append(slider)
+  
     return slider_container
 
 # TODO: make this general, and not just for palettes 
@@ -140,7 +131,7 @@ def run_application():
 
     # SAVE_AS AND QUIT BUTTONS
     side = 20
-    button_c = lo.Button(lo.Structure(pg.Rect(h.s_W-side-20,5,side + 15,side),h.red),h.light_red,h.WHITE)
+    button_c = lo.Button(lo.Structure(pg.Rect(h.s_W - side-20, 5, side + 15, side),h.red),h.LIGHT_RED,h.WHITE)
     button_c.action = MethodType(lo.close_window,button_c)
     
     button_s = lo.Button(lo.Structure(pg.Rect(h.s_W-side- 40 - side,5,side + 15,side),h.blue),h.light_blue,h.WHITE)
@@ -178,7 +169,6 @@ def run_application():
                                             palette_container, 
                                             slider_container, 
                                             user_input)
-
 
         #////////////////////-- Render/Blit to Screen --/////////////////////
                  
@@ -228,11 +218,11 @@ def run_application():
             if val:
                 tool_color = Interface.toolbox.get_active_tool().color
                 if i == 0:
-                    Interface.toolbox.get_active_tool().color = (val,tool_color[1],tool_color[2])
+                    Interface.toolbox.get_active_tool().set_color((val,tool_color[1],tool_color[2]))
                 elif i == 1:
-                    Interface.toolbox.get_active_tool().color = (tool_color[0],val,tool_color[2])
+                    Interface.toolbox.get_active_tool().set_color((tool_color[0],val,tool_color[2]))
                 elif i == 2:
-                    Interface.toolbox.get_active_tool().color = (tool_color[0],tool_color[1],val)
+                    Interface.toolbox.get_active_tool().set_color((tool_color[0],tool_color[1],val))
         
         # ESSENTIAL
         # FIXME:

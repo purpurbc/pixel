@@ -9,6 +9,7 @@ class Pen:
         self.color = color
         
     def set_color(self, color):
+        #print(self.color)
         self.color = color
     
     def fill_pixels(self, pixel_map : pm.PixelMap, center_pos):

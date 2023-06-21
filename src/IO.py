@@ -51,10 +51,10 @@ class IO_handler:
                 button_s.on_pressed(Interface.mouse_pos, self.left_mouse_btn_pressed)
 
                 for slider in slider_container.sliders:
-                    prev_btn_state = slider.button.was_pressed['state']
+                    #prev_btn_state = slider.button.was_pressed['state']
                     if slider.button.on_pressed(Interface.mouse_pos, self.left_mouse_btn_pressed) or slider.button.was_pressed['state']:
-                        if not prev_btn_state and slider.button.was_pressed['state']:
-                            slider.button.set_action_arguments({'prev_mouse_pos' : Interface.mouse_pos})
+                        """if not prev_btn_state and slider.button.was_pressed['state']:
+                            slider.button.set_action_arguments({'prev_mouse_pos' : Interface.mouse_pos})"""
                         slider.button.set_action_arguments({'cur_mouse_pos' : Interface.mouse_pos})
                         pass
 

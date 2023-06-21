@@ -31,6 +31,8 @@ class Saver:
         
         # Put the pixels onto the image
         image_out.putdata(pixels)
+        if self.file_name == '':
+            self.file_name = 'image'
         
         print("- SAVE AS:",self.file_name + self.extension)
         print("- AT LOCATION:", self.location)
