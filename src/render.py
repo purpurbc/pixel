@@ -119,7 +119,6 @@ def draw_slider(game_display, slider : lo.Slider, mouse_pos, left_mouse_btn_pres
 
 
 
-
 def draw_internal_window(game_display, internal_window : lo.InternalWindow):
     #TODO: create Surface and blit that instead. Can use alpha values
     win_struct = internal_window.window_structure

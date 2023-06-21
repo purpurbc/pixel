@@ -18,7 +18,7 @@ black = (25,25,25,255)
 blue = (51,169,205,255)
 light_blue = (81,199,235,255)
 red = (220,20,20,255)
-light_red = (220,100,100,255)
+LIGHT_RED = (220,100,100,255)
 yellow = (255,223,6,255)
 
 clock = pg.time.Clock()
@@ -31,5 +31,11 @@ def get_global_coords(rect, local_coords):
     """Get the global coords from local coords inside of rect"""
     x = rect.x + local_coords[0]
     y = rect.y + local_coords[1]
+    return [x,y]
+
+def get_local_coords(rect, global_coords):
+    """Get the local coords from global coords inside of rect"""
+    x = global_coords[0] - rect.x
+    y = global_coords[1] - rect.y
     return [x,y]
 
